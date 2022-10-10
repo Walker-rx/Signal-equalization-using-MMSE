@@ -85,7 +85,7 @@ filter_receive = filter_receive./norm(filter_receive,2)*sqrt(bw/ups_rate_receive
 snr_begin = 3;
 snr_end = 22;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
-for snr = 22:snr_end
+for snr = 15:snr_end
     looptime = 0;
     snr_sum = 0;
     errornum_zf = 0;
@@ -97,13 +97,14 @@ for snr = 22:snr_end
 %     while(errornum_zf <= 100 || errornum_mmse <= 100 || looptime < 50)
         if mod(looptime,1000) == 0
             ruo_zero_send;
-            pn = bandpower(noise)*(8192^2);
+            pn = bandpower(noise);
         end
-        ps = pn*10^(snr/10);
+%         ps = pn*10^(snr/10);
+        ps = 6000;
         looptime = looptime+1;
         
         ruo_pam4_send;
-          
+        
         signal_received = ruo_sam_rate_con(signal_pass_channel,filter_receive,upf_receive,dof_receive);
 
         [fin_syn_point,coar_syn_point] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_received,num_of_windows);

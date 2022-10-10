@@ -1,6 +1,6 @@
 % clearvars -except channel_choice bias dir_up bias_name  current dp821A  ...
 %          ps upf_transmit dof_transmit filter_transmit filter_ord data_length pilot pilot_bpsk
-rng(0);
+% rng(0);
 M = 4;
 
 data_path = dir_up+"train_set/pam"+M+"/bias"+bias_name+"mA/ruo"+"ruo_pam4";
@@ -14,10 +14,13 @@ data_mpam_ps = bandpower(data_mpam);
 
 unmod = [pilot,zeros(1,10),data];
 signal_ori = [pilot_bpsk,zeros(1,10),data_mpam];
-
-
 signal_send = ruo_sam_rate_con(signal_ori,filter_transmit,upf_transmit,dof_transmit);
-signal_send = signal_send./norm(signal_send,2)*sqrt(length(signal_send))*sqrt(ps);
+% [f,c] = ruo_signal_syn(signal_send,)
+
+% signal_send = ruo_sam_rate_con(signal_send,filter_transmit,upf_transmit,dof_transmit);
+signal_send = signal_send./norm(signal_send,2)*sqrt(length(signal_send))*sqrt(ps)*20;
+signal_send = [rand([1,512]) signal_send];
+% signal_send = [rand([1,512]) zeros(1,10) signal_send];
 Tx{1} = signal_send;
 
 X = ruo_TxDataSort(Tx);

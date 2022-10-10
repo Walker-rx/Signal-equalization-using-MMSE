@@ -1,6 +1,6 @@
 % clearvars -except channel_choice bias dir_up bias_name current dp821A data_length 
 
-zero = zeros(1,data_length);
+zero = zeros(1,1000);
 Tx{1} = zero;
 
 X = ruo_TxDataSort(Tx);
