@@ -30,11 +30,11 @@ test = [1 0 1 0 1 1 1];
 bias_name = 780;
 pause(0.5);
 
-data_length = 10000;
+data_length = 100000;
 zero_length = 10000;
 ls_order = 50;
 
-origin_rate = 25e6; 
+origin_rate = 50e6; 
 bw = origin_rate/2;         % baseband bandwidth
 f_rate = 160e6;
 d_rate = 150e6;
@@ -45,6 +45,7 @@ num_of_windows = 100;
 % pilot = pilot_gen([0 0 0 1 1 1 1]);
 % pilot = pilot_gen([1 1 1 0 0 0 1 1 1]);
 pilot = ruo_pilot_gen([1 1 1 1 1 1 0 1 0 1 0 1 1]);
+% pilot = ruo_pilot_gen([1 1 1 1 1 1 0 1 0 0 1]);
 pilot_ps = bandpower(pilot);
 pilot_length = length(pilot);
 pilot_bpsk = pilot*2-1;
@@ -83,7 +84,7 @@ filter_receive = filter_receive./norm(filter_receive,2)*sqrt(bw/ups_rate_receive
 % h_channel = gpuArray(double(h_channel));
 % h_channel_delay = gpuArray(double(h_channel_delay));
 
-amp_begin = 51;
+amp_begin = 39;
 amp_end = 52;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 for amp = amp_begin:amp_end
@@ -159,10 +160,12 @@ for amp = amp_begin:amp_end
         ser_ls = errornum_ls/total_length;
         snr_ls = 10*log10(ps/pn);
 %         snr_ls = snr_sum/looptime;
-        if mod(looptime,20) == 0
+        if mod(looptime,60) == 0
            fprintf(' %f times, amp = %d , data num = %d ,ls error num = %d .\n',looptime,amp,length(data_demod_ls),errornum_ls_loop);
            fprintf(' %f times, snr = %d , total ls error num = %d,ls error rate = %.6g .\n',looptime,snr_ls,errornum_ls,ser_ls);
            disp(["error location = ",error_location]);
+           disp(["correct = ",data(error_location)]);
+           disp(["false = ",data_demod_ls(error_location)]);
 %            fprintf(' %f times, snr = %f , zf error num = %f , mmse error num = %f .\n',looptime,snr,errornum_zf,errornum_mmse);
 %            fprintf(' %f times, snr = %f , zf error rate = %f , mmse error rate = %f .\n',looptime,snr,ser_zf,ser_mmse);
         end

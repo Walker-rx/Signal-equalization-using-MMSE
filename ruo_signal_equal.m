@@ -188,12 +188,10 @@ function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_
         x_hat = conv(signal_received_ls,W,'valid');
 
         pilot = x_hat(1:pilot_length);
-        pilot = pilot./norm(pilot,2)*sqrt(pilot_length)*sqrt(type{2});
         pilot(pilot <= 0) = 0;
         pilot(pilot > 0) = 1;
         zero = zeros(1,zero_length);
         signal_data = x_hat(pilot_length+zero_length+1:end);
-%         signal_data = signal_data./norm(signal_data,2)*sqrt(length(signal_data))*sqrt(type{3});
         signal_data = (signal_data+3)/2;
         signal_data(signal_data <= 0.5) = 0;
         signal_data(0.5 < signal_data & signal_data <= 1.5) = 1;
