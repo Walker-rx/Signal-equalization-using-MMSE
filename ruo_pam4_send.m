@@ -12,15 +12,13 @@ data = randi([0,M-1],[1,data_length]);
 data_mpam = real(pammod(data,M));
 data_mpam_ps = bandpower(data_mpam);
 
-unmod = [pilot,zeros(1,10),data];
-signal_ori = [pilot_bpsk,zeros(1,10),data_mpam];
+unmod = [pilot,zeros(1,zero_length),data];
+signal_ori = [pilot_bpsk,zeros(1,zero_length),data_mpam];
 signal_send = ruo_sam_rate_con(signal_ori,filter_transmit,upf_transmit,dof_transmit);
-% [f,c] = ruo_signal_syn(signal_send,)
 
-% signal_send = ruo_sam_rate_con(signal_send,filter_transmit,upf_transmit,dof_transmit);
-signal_send = signal_send./norm(signal_send,2)*sqrt(length(signal_send))*sqrt(ps)*20;
-signal_send = [rand([1,512]) signal_send];
-% signal_send = [rand([1,512]) zeros(1,10) signal_send];
+signal_send = signal_send./norm(signal_send,2)*sqrt(length(signal_send))*100*1.1^(amp-1);
+% signal_send = signal_send./norm(signal_send,2)*sqrt(length(signal_send));
+signal_send = [rand([1,512]) zeros(1,10) signal_send];
 Tx{1} = signal_send;
 
 X = ruo_TxDataSort(Tx);

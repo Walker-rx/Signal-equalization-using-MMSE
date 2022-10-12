@@ -1,4 +1,4 @@
-function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_point,pilot_length,num_of_windows,type)
+function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_point,pilot_length,zero_length,num_of_windows,type)
     signal_ori = signal_origin(1:pilot_length); 
     signal_ori2 = upsample(signal_ori,times);
     if coar_syn_point*times-(num_of_windows*times-1) > 0
@@ -24,7 +24,7 @@ function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_
         end
         r_for_judge = r3(r_phase:times:end);
         [~,maxlocation] = max(r_for_judge);
-        if maxlocation >= 12
+        if maxlocation >= 12 && maxlocation+19 < length(r_for_judge)
             channel_h_coefficient = r_for_judge(maxlocation-10:maxlocation+19);
         else
             channel_h_coefficient = r_for_judge(5:14);                          % Find 10 points with maximum correlation as h1 ... h10
@@ -65,8 +65,8 @@ function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_
         pilot = pilot./norm(pilot,2)*sqrt(length(pilot));
         pilot(pilot <= 0) = 0;
         pilot(pilot > 0) = 1;
-        zero = zeros(1,10);
-        signal_data = x_hat(pilot_length+11:pilot_length+11+9999);
+        zero = zeros(1,zero_length);
+        signal_data = x_hat(pilot_length+zero_length+1:pilot_length+zero_length+1+9999);
         signal_data = signal_data./norm(signal_data,2)*sqrt(length(signal_data))*sqrt(5); % Make the symbolic energy of x_hat = the symbolic energy of transmitted signal
         signal_data = (signal_data+3)/2;
         signal_data(signal_data <= 0.5) = 0;
@@ -107,8 +107,8 @@ function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_
         pilot = pilot./norm(pilot,2)*sqrt(length(pilot));
         pilot(pilot <= 0) = 0;
         pilot(pilot > 0) = 1;
-        zero = zeros(1,10);
-        signal_data = x_hat(pilot_length+11:pilot_length+11+9999);
+        zero = zeros(1,zero_length);
+        signal_data = x_hat(pilot_length+zero_length+1:pilot_length+zero_length+1+9999);
         signal_data = signal_data./norm(signal_data,2)*sqrt(length(signal_data))*sqrt(5); % Make the symbolic energy of x_hat = the symbolic energy of transmitted signal
         signal_data = (signal_data+3)/2;
         signal_data(signal_data <= 0.5) = 0;
@@ -145,7 +145,7 @@ function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_
         pilot = pilot./norm(pilot,2)*sqrt(length(pilot));
         pilot(pilot <= 0) = 0;
         pilot(pilot > 0) = 1;
-        zero = zeros(1,10);
+        zero = zeros(1,zero_length);
         signal_data = x_hat(pilot_length+14:end);
         signal_data = signal_data./norm(signal_data,2)*sqrt(length(signal_data))*sqrt(5); % Make the symbolic energy of x_hat = the symbolic energy of transmitted signal
         signal_data = (signal_data+3)/2;
@@ -191,8 +191,8 @@ function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_
         pilot = pilot./norm(pilot,2)*sqrt(pilot_length)*sqrt(type{2});
         pilot(pilot <= 0) = 0;
         pilot(pilot > 0) = 1;
-        zero = zeros(1,10);
-        signal_data = x_hat(pilot_length+11:end);
+        zero = zeros(1,zero_length);
+        signal_data = x_hat(pilot_length+zero_length+1:end);
 %         signal_data = signal_data./norm(signal_data,2)*sqrt(length(signal_data))*sqrt(type{3});
         signal_data = (signal_data+3)/2;
         signal_data(signal_data <= 0.5) = 0;
