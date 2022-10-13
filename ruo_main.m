@@ -3,9 +3,9 @@ close all;
 
 t = datetime('now');
 save_path = "snr_ser/direct/"+t.Month+"."+t.Day;
-if(~exist(save_path,'dir'))
-    mkdir(char(save_path));
-end
+% if(~exist(save_path,'dir'))
+%     mkdir(char(save_path));
+% end
     
 channel_choice = 4;
 dir_up = "./data_set_final/";
@@ -34,7 +34,7 @@ data_length = 100000;
 zero_length = 10000;
 ls_order = 50;
 
-origin_rate = 50e6; 
+origin_rate = 25e6; 
 bw = origin_rate/2;         % baseband bandwidth
 f_rate = 160e6;
 d_rate = 150e6;
@@ -98,12 +98,6 @@ for amp = amp_begin:amp_end
     total_length = 0;
     fprintf('amp = %d .\n', amp);
     
-    fsnr = fopen(save_path+"/snr.txt",'w');
-    fser = fopen(save_path+"/ser.txt",'w');
-    fprintf(fsnr,'add zero ,pilot length  = %.8f , ls order  = %.8f \r\n',pilot_length,ls_order);
-    fprintf(fser,'add zero ,pilot length  = %.8f , ls order  = %.8f \r\n',pilot_length,ls_order);
-    fclose(fsnr);
-    fclose(fser);
 %     while(errornum_ls <= 30 || looptime < 2000)
     while (1)
 %     while(errornum_zf <= 100 || errornum_mmse <= 100 || looptime < 50)

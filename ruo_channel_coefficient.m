@@ -1,4 +1,4 @@
-function [ channel_h_coefficient , channel_delay ] = ruo_channel_coefficient(signal_origin,signal_current,times,coar_syn_point,pilot_length,num_of_windows)
+function channel_h_coefficient = ruo_channel_coefficient(signal_origin,signal_current,times,coar_syn_point,pilot_length,num_of_windows)
     signal_ori = signal_origin(1:pilot_length); 
     signal_ori2 = upsample(signal_ori,times);
     if coar_syn_point*times-(num_of_windows*times-1) > 0
@@ -23,7 +23,5 @@ function [ channel_h_coefficient , channel_delay ] = ruo_channel_coefficient(sig
             channel_h_coefficient = r_for_judge(maxlocation-11:maxlocation+19);
         else
             channel_h_coefficient = r_for_judge(5:14);                          % Find 10 points with maximum correlation as h1 ... h10
-        end
-        channel_h_coefficient = channel_h_coefficient./norm(channel_h_coefficient,2);
-        channel_delay = length(channel_h_coefficient);
+        end        
 end
