@@ -14,6 +14,7 @@ data_mpam_ps = bandpower(data_mpam);
 
 unmod = [pilot,zeros(1,zero_length),data];
 signal_ori = [pilot_bpsk,zeros(1,zero_length),data_mpam];
+
 signal_upsample = ruo_sam_rate_con(signal_ori,filter_transmit,upf_transmit,dof_transmit);
 
 signal_send = signal_upsample./norm(signal_upsample,2)*sqrt(length(signal_upsample))*100*1.1^(amp-1);

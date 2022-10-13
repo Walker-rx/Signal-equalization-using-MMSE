@@ -3,9 +3,10 @@ close all;
 
 t = datetime('now');
 save_path = "snr_ser/direct/"+t.Month+"."+t.Day;
-% if(~exist(save_path,'dir'))
-%     mkdir(char(save_path));
-% end
+if(~exist(save_path,'dir'))
+    mkdir(char(save_path));
+end
+
     
 channel_choice = 4;
 dir_up = "./data_set_final/";
@@ -29,6 +30,7 @@ test = [1 0 1 0 1 1 1];
 
 bias_name = 780;
 pause(0.5);
+
 
 data_length = 100000;
 zero_length = 10000;
@@ -84,8 +86,9 @@ filter_receive = filter_receive./norm(filter_receive,2)*sqrt(bw/ups_rate_receive
 % h_channel = gpuArray(double(h_channel));
 % h_channel_delay = gpuArray(double(h_channel_delay));
 
-amp_begin = 39;
-amp_end = 52;
+
+amp_begin = 4;
+amp_end = 51;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 for amp = amp_begin:amp_end
     looptime = 0;
@@ -97,9 +100,8 @@ for amp = amp_begin:amp_end
     errornum_ls = 0;
     total_length = 0;
     fprintf('amp = %d .\n', amp);
-    
-%     while(errornum_ls <= 30 || looptime < 2000)
-    while (1)
+
+    while(errornum_ls <= 30 || looptime < 2000)
 %     while(errornum_zf <= 100 || errornum_mmse <= 100 || looptime < 50)
 %         if mod(looptime,1000) == 0
 %             ruo_zero_send;
@@ -154,6 +156,7 @@ for amp = amp_begin:amp_end
         ser_ls = errornum_ls/total_length;
         snr_ls = 10*log10(ps/pn);
 %         snr_ls = snr_sum/looptime;
+
         if mod(looptime,60) == 0
            fprintf(' %f times, amp = %d , data num = %d ,ls error num = %d .\n',looptime,amp,length(data_demod_ls),errornum_ls_loop);
            fprintf(' %f times, snr = %d , total ls error num = %d,ls error rate = %.6g .\n',looptime,snr_ls,errornum_ls,ser_ls);
@@ -162,8 +165,7 @@ for amp = amp_begin:amp_end
            disp(["false = ",data_demod_ls(error_location)]);
 %            fprintf(' %f times, snr = %f , zf error num = %f , mmse error num = %f .\n',looptime,snr,errornum_zf,errornum_mmse);
 %            fprintf(' %f times, snr = %f , zf error rate = %f , mmse error rate = %f .\n',looptime,snr,ser_zf,ser_mmse);
-        end
-          
+        end          
     end
     
 %     ser_ls = gather(ser_ls);
