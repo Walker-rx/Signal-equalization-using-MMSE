@@ -192,6 +192,8 @@ function x_demod = ruo_signal_equal(signal_origin,signal_current,times,coar_syn_
         pilot(pilot > 0) = 1;
         zero = zeros(1,zero_length);
         signal_data = x_hat(pilot_length+zero_length+1:end);
+%         signal_data(signal_data <= 0) = 0;
+%         signal_data(signal_data > 0) = 1;
         signal_data = (signal_data+3)/2;
         signal_data(signal_data <= 0.5) = 0;
         signal_data(0.5 < signal_data & signal_data <= 1.5) = 1;

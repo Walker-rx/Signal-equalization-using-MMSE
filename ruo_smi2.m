@@ -74,7 +74,7 @@ filter_channel = filter_channel./norm(filter_channel,2)*sqrt(bw*5/ups_rate_trans
 amp_begin = 20;
 amp_end = 50;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
-for amp = amp_begin:amp_end
+for amp = 35:amp_end
     looptime = 0;
     snr = amp-15;
     ps_smi = 0;
@@ -117,18 +117,9 @@ for amp = amp_begin:amp_end
         signal_passtap_smi = signal_passtap_smi./norm(signal_passtap_smi,2)*sqrt(length(signal_passtap_smi))*sqrt(ps_channel);
         signal_passchannel_smi = awgn(signal_passtap_smi,snr,'measured');
         signal_passchannel_smi = signal_passchannel_smi/8192;
-
-%         ini_ps = bandpower(signal_passtap_smi)/8192^2;
-%         ini_pn = var(signal_passchannel_smi)-ini_ps;
-%         ini_snr = 10*log10(complex(ini_ps/ini_pn));         
-%         
-%         signal2_smi = ruo_sam_rate_con(signal_passtap_smi,filter_receive,upf_receive,dof_receive);
-%         ps_times = bandpower(signal2_smi)/bandpower(signal_passtap_smi);
         
         signal_received_smi = ruo_sam_rate_con(signal_passchannel_smi,filter_receive,upf_receive,dof_receive);
-%         ps_loop = ini_ps*ps_times;
-%         pn_loop = var(signal_received_smi)-ps_loop;
-        
+       
         [fin_syn_point_smi,coar_syn_point_smi] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_received_smi,num_of_windows);
         
         signal_downsample_smi = signal_received_smi(fin_syn_point_smi:times:end);
