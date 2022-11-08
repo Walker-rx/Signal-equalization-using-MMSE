@@ -2,10 +2,10 @@ clear;
 close all;
 
 t = datetime('now');
-save_path = "snr_ser/direct/"+t.Month+"."+t.Day;
-if(~exist(save_path,'dir'))
-    mkdir(char(save_path));
-end
+% save_path = "snr_ser/direct/"+t.Month+"."+t.Day;
+% if(~exist(save_path,'dir'))
+%     mkdir(char(save_path));
+% end
 
 channel_choice = 4;
 dir_up = "./data_set_final/";
@@ -87,7 +87,12 @@ filter_receive = filter_receive./norm(filter_receive,2)*sqrt(bw/ups_rate_receive
 amp_begin = 6;
 amp_end = 52;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
-for amp = amp_begin:amp_end   
+for amp = 40:amp_end
+    save_path_vol = "vol_save/"+t.Month+"."+t.Day+"/amp"+amp;
+    if(~exist(save_path_vol,'dir'))
+    mkdir(char(save_path_vol));
+    end
+    
     looptime = 0;
     ps = 0;
     pn = 0;
@@ -98,8 +103,17 @@ for amp = amp_begin:amp_end
     total_length = 0;
     fprintf('amp = %d .\n', amp);
     
-    while(errornum_ls <= 30 || looptime < 2000)
+    save_time = 0;
+%     while(errornum_ls <= 30 || looptime < 2000)
+    while (1)
+        if save_time >= 400
+            break;
+        end
 %     while(errornum_zf <= 100 || errornum_mmse <= 100 || looptime < 50)
+%         if mod(looptime,1000) == 0
+%             ruo_zero_send;
+%             pn = bandpower(noise);
+%         end
   
         looptime = looptime+1;
         
@@ -150,7 +164,26 @@ for amp = amp_begin:amp_end
         snr_ls = 10*log10(ps/pn);
 %         snr_ls = snr_sum/looptime;
 
-        if mod(looptime,4) == 0
+        if errornum_ls_loop >= 50
+            save_time = save_time + 1;
+            namestr_ori = ['signal_ori_save_' num2str(save_time)];
+            eval([namestr_ori,'= signal_ori;']);
+            namestr_rec = ['signal_received_save_' num2str(save_time)];
+            eval([namestr_rec,'= signal_received;']);
+            
+            if save_time == 1.
+                save(save_path_vol+"/signal_ori_save.mat",namestr_ori);
+                save(save_path_vol+"/signal_received_save.mat",namestr_rec);
+                errnum_save = fopen(save_path_vol+"/errnum_save.txt",'w');
+            else
+                save(save_path_vol+"/signal_ori_save.mat",namestr_ori,'-append');
+                save(save_path_vol+"/signal_received_save.mat",namestr_rec,'-append');
+                errnum_save = fopen(save_path_vol+"/errnum_save.txt",'a');
+            end
+            fprintf(errnum_save,'%d \r\n',errornum_ls_loop);     
+            fclose(errnum_save);
+        end
+        if mod(looptime,1) == 0
            fprintf(' 4pam , %f times, amp = %d , data num = %d ,ls error num = %d .\n',looptime,amp,length(data_demod_ls),errornum_ls_loop);
            fprintf(' %f times, snr = %d , total ls error num = %d,ls error rate = %.6g, save_time = %d .\n',looptime,snr_ls,errornum_ls,ser_ls,save_time);
 %            disp(["error location = ",error_location]);
@@ -164,19 +197,19 @@ for amp = amp_begin:amp_end
     
 %     ser_ls = gather(ser_ls);
 
-    if amp == amp_begin
-        fsnr = fopen(save_path+"/snr.txt",'w');
-        fser = fopen(save_path+"/ser.txt",'w');
-        fprintf(fsnr,' 4pam ,add zero ,pilot length  = %.8f , ls order  = %.8f , bw = %.6g \r\n',pilot_length,ls_order,origin_rate);
-        fprintf(fser,' 4pam ,add zero ,pilot length  = %.8f , ls order  = %.8f , bw = %.6g \r\n',pilot_length,ls_order,origin_rate);
-    else
-        fsnr = fopen(save_path+"/snr.txt",'a');
-        fser = fopen(save_path+"/ser.txt",'a');
-    end
-    fprintf(fsnr,'%.8f \r\n',snr_ls);
-    fprintf(fser,'%.6g \r\n',ser_ls);
-    fclose(fsnr);
-    fclose(fser);
+%     if amp == amp_begin
+%         fsnr = fopen(save_path+"/snr.txt",'w');
+%         fser = fopen(save_path+"/ser.txt",'w');
+%         fprintf(fsnr,' 4pam ,add zero ,pilot length  = %.8f , ls order  = %.8f , bw = %.6g \r\n',pilot_length,ls_order,origin_rate);
+%         fprintf(fser,' 4pam ,add zero ,pilot length  = %.8f , ls order  = %.8f , bw = %.6g \r\n',pilot_length,ls_order,origin_rate);
+%     else
+%         fsnr = fopen(save_path+"/snr.txt",'a');
+%         fser = fopen(save_path+"/ser.txt",'a');
+%     end
+%     fprintf(fsnr,'%.8f \r\n',snr_ls);
+%     fprintf(fser,'%.6g \r\n',ser_ls);
+%     fclose(fsnr);
+%     fclose(fser);
 
 end
 
