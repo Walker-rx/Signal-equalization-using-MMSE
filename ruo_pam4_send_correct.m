@@ -18,20 +18,15 @@ end
 % signal_send = signal_upsample./norm(signal_upsample,2)*sqrt(length(signal_upsample))*100*1.1^(amp-1);
 % % signal_send = signal_send./norm(signal_send,2)*sqrt(length(signal_send));
 % signal_send = [rand([1,512]) zeros(1,10) signal_send];
-Tx{1} = signal_send_inf;
-Tx{2} = signal_send;
+Tx{1} = signal_send;
 
-X_realsend = ruo_TxDataSort(Tx);
-ruo_trans2bin(X_realsend);
+X_correct = ruo_TxDataSort(Tx);
+ruo_trans2bin(X_correct);
 ruo_startUDP();
-Rx_realsend = ruo_bin2receive(channel_choice);
-Rx_realsend = Rx_realsend/(-8192);
-
-Rx_infsend = ruo_bin2receive(channel_choice_inf);
-Rx_infsend = Rx_infsend/(-8192);
-
-signal_pass_channel = Rx_realsend.';
-signal_pass_channel_inf = Rx_infsend.';
+Rx_correct = ruo_bin2receive(channel_choice);
+Rx_correct = Rx_correct/(-8192);
+% Rx = Rx/(-1);
+signal_pass_channel_correct = Rx_correct.';
 
 % Rx = single(Rx);
 % data_mpam = single(data_mpam);
