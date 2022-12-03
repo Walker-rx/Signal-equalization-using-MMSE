@@ -1,5 +1,5 @@
 function [length_loop,ps_loop,pn_loop,errornum_ls_loop,error_location,data_demod_ls] = ruo_calculate_ser(data,signal_ori,signal_received,pilot_length,zero_length,data_length ...
-                                                 ,coar_syn_point,fin_syn_point,times,num_of_windows,ls_order)
+                                                 ,fin_syn_point,times,ls_order)
                                              
     signal_downsample = signal_received(fin_syn_point:times:end);
     noise = signal_downsample(pilot_length+100:pilot_length+100+zero_length/2-1);
@@ -8,7 +8,7 @@ function [length_loop,ps_loop,pn_loop,errornum_ls_loop,error_location,data_demod
     p = bandpower(data_received);
     ps_loop = p - pn_loop;
     
-    signal_demod_ls = ruo_signal_equal(signal_ori,signal_received,times,coar_syn_point,pilot_length,zero_length,num_of_windows,{'ls',ls_order});
+    signal_demod_ls = ruo_signal_equal_ls(signal_ori,signal_received,times,fin_syn_point,pilot_length,zero_length,ls_order);
     data_demod_ls = signal_demod_ls(pilot_length+zero_length+1:end);
     
     if length(data_demod_ls) < data_length

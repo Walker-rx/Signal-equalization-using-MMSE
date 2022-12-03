@@ -11,8 +11,8 @@ if ch_num==1
 elseif ch_num ==2
     Xa = Tx{1};
     Xb = Tx{2};
-    Xc = Tx{1};
-    Xd = Tx{2};
+    Xc = Tx{1}; % channel 4 receive
+    Xd = Tx{2}; % channel 1 receive
 elseif ch_num ==3
     Xa = Tx{1};
     Xb = Tx{2};

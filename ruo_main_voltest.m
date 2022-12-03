@@ -3,7 +3,7 @@ close all;
 
 t = datetime('now');
 
-channel_choice = 4;
+channel_choice = 1;  % 1 is direct channel
 dir_up = "./data_set_final/";
 test = [1 0 1 0 1 1 1];
 
@@ -58,7 +58,7 @@ amp_begin = 40;
 amp_end = 52;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 for amp = amp_begin:amp_end
-    save_path_voltest = "vol_save/11.4_test/amp"+amp;
+    save_path_voltest = "vol_save/11.10_test/amp"+amp;
    if(~exist(save_path_voltest,'dir'))
         mkdir(char(save_path_voltest));
     end
@@ -71,7 +71,6 @@ for amp = amp_begin:amp_end
     total_length = 0;
     fprintf('amp = %d .\n', amp);
     
-    save_time = 0;
 %     while(errornum_ls <= 30 || looptime < 2000)
     while (looptime<=39)
         looptime = looptime+1;
@@ -138,32 +137,46 @@ for amp = amp_begin:amp_end
             snr_ls = 10*log10(ps/pn);
             %         snr_ls = snr_sum/looptime;
             
-            if errornum_ls_loop >= 50
-                save_time = save_time + 1;
+            if mod(exp_time,1) == 0
+                fprintf(' 4pam , %f times, amp = %d , data num = %d ,ls error num = %d .\n',looptime,amp,length(data_demod_ls),errornum_ls_loop);
+                fprintf(' %f times, snr = %d , total ls error num = %d,ls error rate = %.6g .\n',looptime,snr_ls,errornum_ls,ser_ls);
+                %            disp(["error location = ",error_location]);
+                %            disp(["correct = ",data(error_location)]);
+                %            disp(["false = ",data_demod_ls(error_location)]);
+                %            fprintf(' %f times, snr = %f , zf error num = %f , mmse error num = %f .\n',looptime,snr,errornum_zf,errornum_mmse);
+                %            fprintf(' %f times, snr = %f , zf error rate = %f , mmse error rate = %f .\n',looptime,snr,ser_zf,ser_mmse);
             end
             
+            namestr_send = ['signal_send_save_' num2str(exp_time)];
+            namestr_passchannel = ['signal_passchannel_save_' num2str(exp_time)];
             namestr_fin = ['signal_fin_save_' num2str(exp_time)];
             namestr_downsample = ['signal_downsample_save_' num2str(exp_time)];
             namestr_demod = ['signal_demod_save_' num2str(exp_time)];
             namestr_errlocation = ['errlocation_save_' num2str(exp_time)];
+            eval([namestr_send,'= signal_send;']);
+            eval([namestr_passchannel,'= signal_pass_channel;']);
             eval([namestr_fin,'= signal_fin;']);
             eval([namestr_downsample,'= signal_downsample;']);
             eval([namestr_demod,'= signal_demod_ls;']);
             eval([namestr_errlocation,'= error_location;']);
             if exp_time == 1
+                save(save_path+"/signal_send_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_send);
+                save(save_path+"/signal_passchannel_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_passchannel);
                 save(save_path+"/signal_fin_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_fin);
                 save(save_path+"/signal_downsample_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_downsample);
                 save(save_path+"/signal_demod_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_demod);
                 save(save_path+"/errlocation_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_errlocation);
                 errnum_save = fopen(save_path+"/err_number"+"_amp"+amp+"_loc"+mat_location+".txt",'w');
             else
+                save(save_path+"/signal_send_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_send,'-append');
+                save(save_path+"/signal_passchannel_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_passchannel,'-append');
                 save(save_path+"/signal_fin_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_fin,'-append');
                 save(save_path+"/signal_downsample_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_downsample,'-append');
                 save(save_path+"/signal_demod_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_demod,'-append');
                 save(save_path+"/errlocation_save"+"_amp"+amp+"_loc"+mat_location+".mat",namestr_errlocation,'-append');
                 errnum_save = fopen(save_path+"/err_number"+"_amp"+amp+"_loc"+mat_location+".txt",'a');
             end
-            fprintf(errnum_save,'%d \r\n',errornum_ls_loop);
+            fprintf(errnum_save,'errnum =%d, fin_point =%d \r\n',errornum_ls_loop,fin_syn_point);
             fclose(errnum_save); 
             fprintf(' amp = %d , %f times, exp_time = %d .\n',amp,looptime,exp_time);
         end
