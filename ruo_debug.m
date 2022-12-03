@@ -84,10 +84,10 @@ t = datetime('now');
 save_path = "snr_ser/direct/"+t.Month+"."+t.Day+'/debug';
 
 % amp_begin = -6;
-amp_begin = 50;
-amp_end = 53;
+amp_begin = 52;
+amp_end = 62;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
-for amp = 50:amp_end
+for amp = amp_begin:amp_end
     save_path_mat = save_path+"/amp"+amp+"/mat";
     save_path_txt = save_path+"/amp"+amp+"/txt";
     if(~exist(save_path_mat,'dir'))
@@ -180,12 +180,18 @@ for amp = 50:amp_end
         %% Replacing the transmission error point
         signal_received_tmp = signal_received_channel1_send1;
         signal_received_aftercorrect = signal_received_channel1_send1;
+        signal_ori_resyn = signal_received_aftercorrect(fin_syn_point_channel1_send1:end);
+        fin_syn_point_forcorrect = ruo_signal_syn_recorrect(signal_ori_resyn,signal_received_channel1_send2,fin_syn_point_channel1_send2);
         replace_loc = error_location_inf*times + fin_syn_point_channel1_send1 - 1;
-        replace_loc_correct = error_location_inf*times + fin_syn_point_channel1_send2 - 1;
+        replace_loc_correct = error_location_inf*times + fin_syn_point_forcorrect - 1;
         replace_length = 8*times;
         for i = 1:txerror_num_loop
-            signal_received_aftercorrect(replace_loc(i)-replace_length : replace_loc(i)+replace_length) = signal_received_channel1_send2(replace_loc_correct(i)-replace_length : replace_loc_correct(i)+replace_length);
-        end       
+            if (replace_loc(i)-replace_length) > 0
+                signal_received_aftercorrect(replace_loc(i)-replace_length : replace_loc(i)+replace_length) = signal_received_channel1_send2(replace_loc_correct(i)-replace_length : replace_loc_correct(i)+replace_length);
+            else
+                signal_received_aftercorrect(1 : replace_loc(i)+replace_length) = signal_received_channel1_send2(1 : replace_loc_correct(i)+replace_length);
+            end
+        end
         %% Calculating the SER after correction
         [length_loop_aftercorrect , ps_loop_aftercorrect , pn_loop_aftercorrect , ...
                     errornum_ls_loop_aftercorrect , error_location_aftercorrect , data_demod_ls_aftercorrect] ...
@@ -224,7 +230,7 @@ for amp = 50:amp_end
         save_fin_syn_point_channel1_send1 = ['save_fin_syn_point_channel1_send1_' num2str(looptime)];
         save_coar_syn_point_channel1_send1 = ['save_coar_syn_point_channel1_send1_' num2str(looptime)];
         save_signal_received_channel1_send2 = ['save_signal_received_channel1_send2_' num2str(looptime)];
-        save_fin_syn_point_channel1_send2 = ['save_fin_syn_point_channel1_send2_' num2str(looptime)];
+        save_fin_syn_point_forcorrect = ['save_fin_syn_point_forcorrect_' num2str(looptime)];
         save_coar_syn_point_channel1_send2 = ['save_coar_syn_point_channel1_send2_' num2str(looptime)];       
         save_signal_received_aftercorrect = ['save_signal_received_aftercorrect_' num2str(looptime)];
         save_replace_location = ['save_replace_location_' num2str(looptime)];
@@ -246,7 +252,7 @@ for amp = 50:amp_end
         eval([save_fin_syn_point_channel1_send1,'=fin_syn_point_channel1_send1;']);
         eval([save_coar_syn_point_channel1_send1,'=coar_syn_point_channel1_send1;']);
         eval([save_signal_received_channel1_send2,'=signal_received_channel1_send2;']);
-        eval([save_fin_syn_point_channel1_send2,'=fin_syn_point_channel1_send2;']);
+        eval([save_fin_syn_point_forcorrect,'=fin_syn_point_forcorrect;']);
         eval([save_coar_syn_point_channel1_send2,'=coar_syn_point_channel1_send2;']);        
         eval([save_signal_received_aftercorrect,'=signal_received_aftercorrect;']);
         eval([save_replace_location,'=error_location_inf;']);
@@ -269,7 +275,7 @@ for amp = 50:amp_end
             save(save_path_mat+"/save_fin_syn_point_channel1_send1.mat",save_fin_syn_point_channel1_send1);
             save(save_path_mat+"/save_coar_syn_point_channel1_send1.mat",save_coar_syn_point_channel1_send1);
             save(save_path_mat+"/save_signal_received_channel1_send2.mat",save_signal_received_channel1_send2);
-            save(save_path_mat+"/save_fin_syn_point_channel1_send2.mat",save_fin_syn_point_channel1_send2);
+            save(save_path_mat+"/save_fin_syn_point_forcorrect.mat",save_fin_syn_point_forcorrect);
             save(save_path_mat+"/save_coar_syn_point_channel1_send2.mat",save_coar_syn_point_channel1_send2);
             save(save_path_mat+"/save_signal_received_aftercorrect.mat",save_signal_received_aftercorrect);
             save(save_path_mat+"/save_replace_location.mat",save_replace_location);
@@ -294,7 +300,7 @@ for amp = 50:amp_end
             save(save_path_mat+"/save_fin_syn_point_channel1_send1.mat",save_fin_syn_point_channel1_send1,'-append');
             save(save_path_mat+"/save_coar_syn_point_channel1_send1.mat",save_coar_syn_point_channel1_send1,'-append');
             save(save_path_mat+"/save_signal_received_channel1_send2.mat",save_signal_received_channel1_send2,'-append');
-            save(save_path_mat+"/save_fin_syn_point_channel1_send2.mat",save_fin_syn_point_channel1_send2,'-append');
+            save(save_path_mat+"/save_fin_syn_point_channel1_send2.mat",save_fin_syn_point_forcorrect,'-append');
             save(save_path_mat+"/save_coar_syn_point_channel1_send2.mat",save_coar_syn_point_channel1_send2,'-append');
             save(save_path_mat+"/save_signal_received_aftercorrect.mat",save_signal_received_aftercorrect,'-append');
             save(save_path_mat+"/save_replace_location.mat",save_replace_location,'-append');

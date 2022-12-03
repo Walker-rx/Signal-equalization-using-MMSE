@@ -7,7 +7,7 @@ t = datetime('now');
 %     mkdir(char(save_path));
 % end
 
-channel_choice = 4;
+channel_choice = 1;
 dir_up = "./data_set_final/";
 test = [1 0 1 0 1 1 1];
 % bias = input('bias(mA): ')

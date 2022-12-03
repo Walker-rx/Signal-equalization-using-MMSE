@@ -1,4 +1,4 @@
-save_path = "snr_ser/direct/11.25/debug";
+save_path = "snr_ser/direct/12.1/debug";
 save_path_mat = save_path+"/amp"+amp+"/mat";
 
 load(save_path_mat+"/save_data.mat");
@@ -15,7 +15,7 @@ load(save_path_mat+"/save_signal_received_channel1_send1.mat");
 load(save_path_mat+"/save_fin_syn_point_channel1_send1.mat");
 load(save_path_mat+"/save_coar_syn_point_channel1_send1.mat");
 load(save_path_mat+"/save_signal_received_channel1_send2.mat");
-load(save_path_mat+"/save_fin_syn_point_channel1_send2.mat");
+load(save_path_mat+"/save_fin_syn_point_forcorrect.mat");
 load(save_path_mat+"/save_coar_syn_point_channel1_send2.mat");
 load(save_path_mat+"/save_signal_received_aftercorrect.mat");
 load(save_path_mat+"/save_replace_location.mat");
@@ -37,7 +37,7 @@ save_signal_received_channel1_send1 = ['save_signal_received_channel1_send1_' nu
 save_fin_syn_point_channel1_send1 = ['save_fin_syn_point_channel1_send1_' num2str(looptime)];
 save_coar_syn_point_channel1_send1 = ['save_coar_syn_point_channel1_send1_' num2str(looptime)];
 save_signal_received_channel1_send2 = ['save_signal_received_channel1_send2_' num2str(looptime)];
-save_fin_syn_point_channel1_send2 = ['save_fin_syn_point_channel1_send2_' num2str(looptime)];
+save_fin_syn_point_forcorrect = ['save_fin_syn_point_forcorrect_' num2str(looptime)];
 save_coar_syn_point_channel1_send2 = ['save_coar_syn_point_channel1_send2_' num2str(looptime)];
 save_signal_received_aftercorrect = ['save_signal_received_aftercorrect_' num2str(looptime)];
 save_replace_location = ['save_replace_location_' num2str(looptime)];
@@ -59,7 +59,7 @@ signal_received_notcorrect = eval(save_signal_received_channel1_send1);
 fin_syn_point = eval(save_fin_syn_point_channel1_send1);
 coar_syn_point = eval(save_coar_syn_point_channel1_send1);
 signal_received_forcorrect = eval(save_signal_received_channel1_send2);
-fin_syn_point_forcorrect = eval(save_fin_syn_point_channel1_send2);
+fin_syn_point_forcorrect = eval(save_fin_syn_point_forcorrect);
 coar_syn_point_forcorrect = eval(save_coar_syn_point_channel1_send2);
 signal_received_aftercorrect = eval(save_signal_received_aftercorrect);
 replace_location = eval(save_replace_location);
