@@ -1,3 +1,0 @@
- 4pam ,add zero ,pilot length  = 2047 , zero length  = 3000 , data length  = 10000 , bw = 2.5e+07 
-8.32497431 
-9.19325811 
