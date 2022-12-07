@@ -4,7 +4,11 @@ function [length_loop,ps_loop,pn_loop,errornum_ls_loop,error_location,data_demod
     signal_downsample = signal_received(fin_syn_point:times:end);
     noise = signal_downsample(pilot_length+100:pilot_length+100+zero_length/2-1);
     pn_loop = bandpower(noise);
-    data_received = signal_downsample(pilot_length+zero_length+1:pilot_length+zero_length+1+data_length-1);
+    if (pilot_length+zero_length+1+data_length-1) <= length(signal_downsample)
+        data_received = signal_downsample(pilot_length+zero_length+1:pilot_length+zero_length+1+data_length-1);
+    else
+        data_received = signal_downsample(pilot_length+zero_length+1:end);
+    end
     p = bandpower(data_received);
     ps_loop = p - pn_loop;
     

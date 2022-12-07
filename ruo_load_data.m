@@ -1,4 +1,4 @@
-save_path = "snr_ser/direct/12.1/debug";
+save_path = "snr_ser/direct/12.5/debug";
 save_path_mat = save_path+"/amp"+amp+"/mat";
 
 load(save_path_mat+"/save_data.mat");

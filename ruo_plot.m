@@ -1,17 +1,19 @@
 clearvars -except filter_receive upf_receive dof_receive origin_rate d_rate num_of_windows times pilot_length zero_length num_of_windows ls_order
 
-amp = 53;
-looptime = 21;
+amp = 60;
+looptime = 11;
 
 ruo_load_data
 
-signal_nofalse = ruo_sam_rate_con(signal_send,filter_receive,upf_receive,dof_receive);
-[fin_syn_point_nofalse,coar_syn_point_nofalse] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_nofalse,num_of_windows);
-signal_nofalse = signal_nofalse(fin_syn_point_nofalse:end);
-signal_nofalse = signal_nofalse/max(signal_nofalse);
+signal_nofalse_tmp = ruo_sam_rate_con(signal_send,filter_receive,upf_receive,dof_receive);
+[fin_syn_point_nofalse,coar_syn_point_nofalse] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_nofalse_tmp,num_of_windows);
+signal_nofalse = signal_nofalse_tmp(fin_syn_point_nofalse:end);
+% signal_nofalse = signal_nofalse/max(signal_nofalse);
+signal_nofalse = signal_nofalse./norm(signal_nofalse,2)*sqrt(length(signal_nofalse));
 
 signal_inf = signal_received_inf(fin_syn_point_inf:end)/max(signal_received_inf(fin_syn_point_inf:end));
-signal_notcorrect = signal_received_notcorrect(fin_syn_point:end)/max(signal_received_notcorrect(fin_syn_point:end));
+% signal_notcorrect = signal_received_notcorrect(fin_syn_point:end)/max(signal_received_notcorrect(fin_syn_point:end));
+signal_notcorrect = signal_received_notcorrect(fin_syn_point:end)./norm(signal_received_notcorrect(fin_syn_point:end),2)*sqrt(length(signal_received_notcorrect(fin_syn_point:end)));
 signal_forcorrect = signal_received_forcorrect(fin_syn_point_forcorrect:end)/max(signal_received_forcorrect(fin_syn_point_forcorrect:end));
 signal_aftercorrect = signal_received_aftercorrect(fin_syn_point:end)/max(signal_received_aftercorrect(fin_syn_point:end));
 
@@ -164,7 +166,7 @@ plot_point_data_after = errlocation_after - 1;
 
 
 %% 替换后的错误位置的曲线
-for i = 1:length(plot_point_after)
+for i = 200:length(plot_point_after)
     close all    
     %% data
     figure
