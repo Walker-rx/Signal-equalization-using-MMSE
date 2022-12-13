@@ -8,6 +8,7 @@ function [fin_syn_point,coar_syn_point] = ruo_signal_syn(origin_sam_rate,cur_sam
     end
 
     times = cur_sam_rate/origin_sam_rate;
+    times = round(times);
     maxlag = 500*times;
     % signal_ori = fliplr(sys_mpam(1:256));
 %     signal_ori = origin_signal(1:times*50); 

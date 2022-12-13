@@ -28,6 +28,7 @@ function[new_origin_rate , new_d_rate , upf_transmit , dof_transmit , filter_tra
 
             upf_receive = upf_receive_tmp;
             dof_receive = llcm_receive/new_d_rate;
+            dof_receive = round(dof_receive);
         end
     end
 
