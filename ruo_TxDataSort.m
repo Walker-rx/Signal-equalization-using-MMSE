@@ -9,10 +9,10 @@ if ch_num==1
     Xc = Tx{1};
     Xd = Tx{1};
 elseif ch_num ==2
-    Xa = Tx{1};
-    Xb = Tx{2};
-    Xc = Tx{1}; % channel 4 receive
-    Xd = Tx{2}; % channel 1 receive
+    Xa = Tx{1};% DA2 in hardware
+    Xb = Tx{2}; % DA3 in hardware
+    Xc = Tx{1}; % DA4 in hardware
+    Xd = Tx{2}; % DA1 in hardwareS
 elseif ch_num ==3
     Xa = Tx{1};
     Xb = Tx{2};

@@ -1,8 +1,8 @@
 clear;
 close all;
 
-channel_choice = 1; % % 1 is direct channel
-channel_choice_inf = 4;
+channel_choice = 1; 
+channel_choice_inf = 3;
 dir_up = "./data_set_final/";
 test = [1 0 1 0 1 1 1];
 % bias = input('bias(mA): ')
@@ -33,11 +33,11 @@ ls_order = 50;
 num_of_windows = 100;
 
 times = 6;
-origin_rate_tmp = 1.17e6;
+origin_rate_tmp = 67e6;
 f_rate = 160e6;
 d_rate_tmp = origin_rate_tmp*times;
 
-filter_order = 200;     % filter order used in function sam_rate_con
+filter_order = 1000;     % filter order used in function sam_rate_con
 rp = 0.00057565;      
 rst = 1e-4;       % filter parameter used in function sam_rate_con
 
@@ -80,9 +80,9 @@ if(~exist(save_path,'dir'))
     mkdir(char(save_path));
 end
 
-amp_begin = -20;
+amp_begin = -2;
 amp_end = 62;
-amp_inf = 25;
+amp_inf = 35;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 
 for amp = amp_begin:amp_end
@@ -103,7 +103,7 @@ for amp = amp_begin:amp_end
     replace_correct_num = 0;
 
     while(errornum_ls_aftercorrect <= 100 || looptime < 500)
-%     while(errornum_zf <= 100 || errornum_mmse <= 100 || looptime < 50)
+%     while(looptime < 10)
         
         looptime = looptime+1;
          %% Signal send
@@ -157,64 +157,64 @@ for amp = amp_begin:amp_end
         txerror_num = txerror_num + txerror_num_loop ;
         txerror_num_average = txerror_num/looptime ;
         %% Calculating the SER without correction
-        signal_received_channel1_send1 = ruo_sam_rate_con(signal_pass_channel,filter_receive,upf_receive,dof_receive);       
-        [fin_syn_point_channel1_send1_tmp , coar_syn_point_channel1_send1_tmp] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_received_channel1_send1,num_of_windows);      
-        if (length(signal_received_channel1_send1) - length(signal_received_channel1_send1(fin_syn_point_channel1_send1_tmp:end))) > (pilot_length + zero_length_forsyn)*times
-            coar_syn_point_channel1_send1 = coar_syn_point_channel1_send1_tmp;
-            fin_syn_point_channel1_send1 = fin_syn_point_channel1_send1_tmp;
+        signal_received_real_send1 = ruo_sam_rate_con(signal_pass_channel,filter_receive,upf_receive,dof_receive);       
+        [fin_syn_point_real_send1_tmp , coar_syn_point_real_send1_tmp] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_received_real_send1,num_of_windows);      
+        if (length(signal_received_real_send1) - length(signal_received_real_send1(fin_syn_point_real_send1_tmp:end))) > (pilot_length + zero_length_forsyn)*times
+            coar_syn_point_real_send1 = coar_syn_point_real_send1_tmp;
+            fin_syn_point_real_send1 = fin_syn_point_real_send1_tmp;
         else
-            coar_syn_point_channel1_send1 = coar_syn_point_channel1_send1_tmp + pilot_length + zero_length_forsyn;
-            fin_syn_point_channel1_send1 = fin_syn_point_channel1_send1_tmp + (pilot_length + zero_length_forsyn)*times;
+            coar_syn_point_real_send1 = coar_syn_point_real_send1_tmp + pilot_length + zero_length_forsyn;
+            fin_syn_point_real_send1 = fin_syn_point_real_send1_tmp + (pilot_length + zero_length_forsyn)*times;
         end              
-        [length_loop_channel1_send1 , ps_loop_channel1_send1 , pn_loop_channel1_send1 , ...
-            errornum_ls_loop_channel1_send1 , error_location_loop_channel1_send1 , data_demod_ls_channel1_send1] ...
-            = ruo_calculate_ser( data , signal_ori , signal_received_channel1_send1 , pilot_length , zero_length , data_length ...
-                                 , fin_syn_point_channel1_send1 , times , ls_order);
+        [length_loop_real_send1 , ps_loop_real_send1 , pn_loop_real_send1 , ...
+            errornum_ls_loop_real_send1 , error_location_loop_real_send1 , data_demod_ls_real_send1] ...
+            = ruo_calculate_ser( data , signal_ori , signal_received_real_send1 , pilot_length , zero_length , data_length ...
+                                 , fin_syn_point_real_send1 , times , ls_order);
                                    
-        signal_received_channel1_send2 = ruo_sam_rate_con(signal_pass_channel_correct,filter_receive,upf_receive,dof_receive);
-        [fin_syn_point_channel1_send2_tmp , coar_syn_point_channel1_send2_tmp] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_received_channel1_send2,num_of_windows);
-        if (length(signal_received_channel1_send2) - length(signal_received_channel1_send2(fin_syn_point_channel1_send2_tmp:end))) > (pilot_length + zero_length_forsyn)*times
-            coar_syn_point_channel1_send2 = coar_syn_point_channel1_send2_tmp;
-            fin_syn_point_channel1_send2 = fin_syn_point_channel1_send2_tmp;
+        signal_received_real_send2 = ruo_sam_rate_con(signal_pass_channel_correct,filter_receive,upf_receive,dof_receive);
+        [fin_syn_point_real_send2_tmp , coar_syn_point_real_send2_tmp] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_received_real_send2,num_of_windows);
+        if (length(signal_received_real_send2) - length(signal_received_real_send2(fin_syn_point_real_send2_tmp:end))) > (pilot_length + zero_length_forsyn)*times
+            coar_syn_point_real_send2 = coar_syn_point_real_send2_tmp;
+            fin_syn_point_real_send2 = fin_syn_point_real_send2_tmp;
         else
-            coar_syn_point_channel1_send2 = coar_syn_point_channel1_send2_tmp + pilot_length + zero_length_forsyn;
-            fin_syn_point_channel1_send2 = fin_syn_point_channel1_send2_tmp + (pilot_length + zero_length_forsyn)*times;
+            coar_syn_point_real_send2 = coar_syn_point_real_send2_tmp + pilot_length + zero_length_forsyn;
+            fin_syn_point_real_send2 = fin_syn_point_real_send2_tmp + (pilot_length + zero_length_forsyn)*times;
         end        
-        [length_loop_channel1_send2 , ps_loop_channel1_send2 , pn_loop_channel1_send2 , ...
-            errornum_ls_loop_channel1_send2 , error_location_loop_channel1_send2 , data_demod_ls_channel1_send2] ...
-            = ruo_calculate_ser( data , signal_ori , signal_received_channel1_send2 , pilot_length , zero_length , data_length ...
-                                 , fin_syn_point_channel1_send2 , times , ls_order);
+        [length_loop_real_send2 , ps_loop_real_send2 , pn_loop_real_send2 , ...
+            errornum_ls_loop_real_send2 , error_location_loop_real_send2 , data_demod_ls_real_send2] ...
+            = ruo_calculate_ser( data , signal_ori , signal_received_real_send2 , pilot_length , zero_length , data_length ...
+                                 , fin_syn_point_real_send2 , times , ls_order);
         
-        total_length_beforecorrect = total_length_beforecorrect + length_loop_channel1_send1 + length_loop_channel1_send2;
-        ps_beforecorrect = ps_beforecorrect + ps_loop_channel1_send1 + ps_loop_channel1_send2;
-        pn_beforecorrect = pn_beforecorrect + pn_loop_channel1_send1 + pn_loop_channel1_send2;
-        errornum_ls_beforecorrect = errornum_ls_beforecorrect + errornum_ls_loop_channel1_send1 + errornum_ls_loop_channel1_send2;
+        total_length_beforecorrect = total_length_beforecorrect + length_loop_real_send1 + length_loop_real_send2;
+        ps_beforecorrect = ps_beforecorrect + ps_loop_real_send1 + ps_loop_real_send2;
+        pn_beforecorrect = pn_beforecorrect + pn_loop_real_send1 + pn_loop_real_send2;
+        errornum_ls_beforecorrect = errornum_ls_beforecorrect + errornum_ls_loop_real_send1 + errornum_ls_loop_real_send2;
         
         snr_ls_beforecorrect = 10*log10(ps_beforecorrect/pn_beforecorrect);
         ser_ls_beforecorrect = errornum_ls_beforecorrect/total_length_beforecorrect;
         
         %% Replacing the transmission error point
-        signal_received_tmp = signal_received_channel1_send1;
-        signal_received_aftercorrect = signal_received_channel1_send1;
-        signal_ori_resyn = signal_received_aftercorrect(fin_syn_point_channel1_send1_tmp:end);
-        fin_syn_point_forcorrect_tmp = ruo_signal_syn_recorrect(signal_ori_resyn,signal_received_channel1_send2,fin_syn_point_channel1_send2_tmp);
-        if fin_syn_point_channel1_send1 == fin_syn_point_channel1_send1_tmp && fin_syn_point_channel1_send2 == fin_syn_point_channel1_send2_tmp
+        signal_received_tmp = signal_received_real_send1;
+        signal_received_aftercorrect = signal_received_real_send1;
+        signal_ori_resyn = signal_received_aftercorrect(fin_syn_point_real_send1_tmp:end);
+        fin_syn_point_forcorrect_tmp = ruo_signal_syn_recorrect(signal_ori_resyn,signal_received_real_send2,fin_syn_point_real_send2_tmp);
+        if fin_syn_point_real_send1 == fin_syn_point_real_send1_tmp && fin_syn_point_real_send2 == fin_syn_point_real_send2_tmp
             fin_syn_point_forcorrect = fin_syn_point_forcorrect_tmp;
         else         
             fin_syn_point_forcorrect = fin_syn_point_forcorrect_tmp + (pilot_length + zero_length_forsyn)*times;
         end
         if txerror_num_loop > 0
-            replace_loc = error_location_inf*times + fin_syn_point_channel1_send1 - 1;
+            replace_loc = error_location_inf*times + fin_syn_point_real_send1 - 1;
             replace_loc_correct = error_location_inf*times + fin_syn_point_forcorrect - 1;         
             for i = 1:txerror_num_loop
                 if (replace_loc(i)-replace_length) > 0
-                    if replace_loc(i)+replace_length > length(signal_received_aftercorrect) || replace_loc_correct(i)+replace_length > length(signal_received_channel1_send2)
-                        signal_received_aftercorrect(length(signal_received_aftercorrect)-2*replace_length : end) = signal_received_channel1_send2(length(signal_received_channel1_send2)-2*replace_length : end);
+                    if replace_loc(i)+replace_length > length(signal_received_aftercorrect) || replace_loc_correct(i)+replace_length > length(signal_received_real_send2)
+                        signal_received_aftercorrect(length(signal_received_aftercorrect)-2*replace_length : end) = signal_received_real_send2(length(signal_received_real_send2)-2*replace_length : end);
                     else
-                        signal_received_aftercorrect(replace_loc(i)-replace_length : replace_loc(i)+replace_length) = signal_received_channel1_send2(replace_loc_correct(i)-replace_length : replace_loc_correct(i)+replace_length);
+                        signal_received_aftercorrect(replace_loc(i)-replace_length : replace_loc(i)+replace_length) = signal_received_real_send2(replace_loc_correct(i)-replace_length : replace_loc_correct(i)+replace_length);
                     end                   
                 else
-                    signal_received_aftercorrect(1 : replace_loc(i)+replace_length) = signal_received_channel1_send2(1 : replace_loc_correct(i)+replace_length);
+                    signal_received_aftercorrect(1 : replace_loc(i)+replace_length) = signal_received_real_send2(1 : replace_loc_correct(i)+replace_length);
                 end
             end
         end
@@ -222,7 +222,7 @@ for amp = amp_begin:amp_end
         [length_loop_aftercorrect , ps_loop_aftercorrect , pn_loop_aftercorrect , ...
             errornum_ls_loop_aftercorrect , error_location_aftercorrect , data_demod_ls_aftercorrect] ...
             = ruo_calculate_ser( data , signal_ori , signal_received_aftercorrect , pilot_length , zero_length , data_length ...
-                                 , fin_syn_point_channel1_send1 , times , ls_order);
+                                 , fin_syn_point_real_send1 , times , ls_order);
         
         total_length_aftercorrect = total_length_aftercorrect + length_loop_aftercorrect;
         errornum_ls_aftercorrect = errornum_ls_aftercorrect + errornum_ls_loop_aftercorrect;
@@ -232,14 +232,14 @@ for amp = amp_begin:amp_end
         ser_ls_aftercorrect = errornum_ls_aftercorrect/total_length_aftercorrect;
         snr_ls_aftercorrect = 10*log10(ps_aftercorrect/pn_aftercorrect);
         
-        replace_correct_num_tmp = errornum_ls_loop_channel1_send1 - errornum_ls_loop_aftercorrect;
+        replace_correct_num_tmp = errornum_ls_loop_real_send1 - errornum_ls_loop_aftercorrect;
         replace_correct_num = replace_correct_num + replace_correct_num_tmp;
-        if errornum_ls_loop_channel1_send1 > errornum_ls_loop_aftercorrect
+        if errornum_ls_loop_real_send1 > errornum_ls_loop_aftercorrect
             replace_valid_num = replace_valid_num + 1;
         end
 %         snr_ls_beforecorrect = 0;
 %         ser_ls_beforecorrect = 0; 
-        fprintf(' %f times, before error = %d , replace num = %d , after error = %d , replace correct num = %d .\n',looptime , errornum_ls_loop_channel1_send1 , txerror_num_loop ,  errornum_ls_loop_aftercorrect , replace_correct_num_tmp);
+        fprintf(' %f times, before error = %d , replace num = %d , after error = %d , replace correct num = %d .\n',looptime , errornum_ls_loop_real_send1 , txerror_num_loop ,  errornum_ls_loop_aftercorrect , replace_correct_num_tmp);
         if mod(looptime,5) == 0
            fprintf('\n');
            fprintf(' amp = %d , %d times, average tx error num = %d .\n',amp,looptime,txerror_num_average);
