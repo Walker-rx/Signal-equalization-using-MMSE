@@ -1,4 +1,4 @@
-function Rx=bin2receive_test(ch_num)
+function Rx=ruo_bin2receive(ch_num)
 %%
  % ch_num 1 (AD6 in hardware)
  % ch_num 2  (AD8 in hardware) 

@@ -1,7 +1,6 @@
 % clearvars -except channel_choice bias dir_up bias_name  current dp821A  ...
 %          ps upf_transmit dof_transmit filter_transmit filter_ord data_length pilot pilot_bpsk
 
-M = 4;
 data_path = dir_up+"train_set/pam"+M+"/bias"+bias_name+"mA/ruo"+"ruo_pam4";
 if(~exist(data_path,'dir'))
     mkdir(char(data_path));

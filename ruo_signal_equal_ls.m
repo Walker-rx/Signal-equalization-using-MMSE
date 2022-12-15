@@ -36,11 +36,15 @@ function x_demod = ruo_signal_equal_ls(signal_origin,signal_current,times,fin_sy
     signal_data = x_hat(pilot_length+zero_length+1:end);
     %         signal_data(signal_data <= 0) = 0;
     %         signal_data(signal_data > 0) = 1;
-    signal_data = (signal_data+3)/2;
+    signal_data = (signal_data+7)/2;
     signal_data(signal_data <= 0.5) = 0;
     signal_data(0.5 < signal_data & signal_data <= 1.5) = 1;
     signal_data(1.5 < signal_data & signal_data <= 2.5) = 2;
-    signal_data(2.5 < signal_data) = 3;
+    signal_data(2.5 < signal_data & signal_data <= 3.5) = 3;
+    signal_data(3.5 < signal_data & signal_data <= 4.5) = 4;
+    signal_data(4.5 < signal_data & signal_data <= 5.5) = 5;
+    signal_data(5.5 < signal_data & signal_data <= 6.5) = 6;
+    signal_data(6.5 < signal_data) = 7;
     x_demod = [ pilot, zero, signal_data ];
 
 end
