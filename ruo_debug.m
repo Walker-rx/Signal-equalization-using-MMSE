@@ -1,8 +1,8 @@
 clear;
 close all;
 
-channel_choice = 1; % % 1 is direct channel
-channel_choice_inf = 4;
+channel_choice = 1; %  1 is light channel
+channel_choice_inf = 3;%  3 is direct channel
 dir_up = "./data_set_final/";
 test = [1 0 1 0 1 1 1];
 % bias = input('bias(mA): ')
@@ -33,11 +33,11 @@ ls_order = 50;
 num_of_windows = 100;
 
 times = 6;
-origin_rate_tmp = 1.17e6;
+origin_rate_tmp = 10e6;
 f_rate = 160e6;
 d_rate_tmp = origin_rate_tmp*times;
 
-filter_order = 200;     % filter order used in function sam_rate_con
+filter_order = 1000;     % filter order used in function sam_rate_con
 rp = 0.00057565;      
 rst = 1e-4;       % filter parameter used in function sam_rate_con
 
@@ -56,38 +56,24 @@ rate_change = 100*abs(origin_rate-origin_rate_tmp)/origin_rate_tmp;
 fprintf("rate's change = %.8f%% \n",rate_change);
 ups_time = upf_transmit/dof_transmit;
 data_length = round(data_length_initial*8/ups_time);
-%%
-% origin_rate = gpuArray(double(origin_rate));
-% f_rate = gpuArray(double(f_rate));
-% d_rate = gpuArray(double(d_rate));
-% num_of_windows = gpuArray(double(num_of_windows));
-% times = gpuArray(double(times));
-% pilot_length = gpuArray(double(pilot_length));
-% delay = gpuArray(double(delay));
-% filter_transmit = gpuArray(double(filter_transmit));
-% filter_receive = gpuArray(double(filter_receive));
-% upf_transmit = gpuArray(double(upf_transmit));
-% dof_transmit = gpuArray(double(dof_transmit));
-% upf_receive = gpuArray(double(upf_receive));
-% dof_receive = gpuArray(double(dof_receive));
-% h_channel = gpuArray(double(h_channel));
-% h_channel_delay = gpuArray(double(h_channel_delay));
 
 %%
 t = datetime('now');
-save_path = "snr_ser/direct/"+t.Month+"."+t.Day+"/debug";
+save_path = "vol_save/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M";
+if(~exist(save_path,'dir'))
+    mkdir(char(save_path));
+end
 
-amp_begin = -6;
+amp_begin = 8;
 amp_end = 62;
-amp_inf = 33;
-fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
+amp_inf = 38;
 
-for amp = amp_begin:amp_end
+fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
+for amp = 40:amp_end
     save_path_mat = save_path+"/amp"+amp+"/mat";
     save_path_txt = save_path+"/amp"+amp+"/txt";
-
+    
     looptime = 0;
-    save_time = 0;
     ps_aftercorrect = 0;
     pn_aftercorrect = 0;
     ps_beforecorrect = 0;
@@ -102,10 +88,10 @@ for amp = amp_begin:amp_end
     replace_length = 8*times;
     replace_valid_num = 0;
     replace_correct_num = 0;
-    fprintf('amp = %d .\n', amp);
- 
+    save_time = 0;
+
     while(errornum_ls_aftercorrect <= 100 || looptime < 500)
-%     while(errornum_zf <= 100 || errornum_mmse <= 100 || looptime < 50)
+%     while(looptime < 10)
         
         looptime = looptime+1;
          %% Signal send
@@ -248,118 +234,130 @@ for amp = amp_begin:amp_end
            fprintf(' %f times, before, snr = %d , total ls error num = %d , ls error rate = %.6g .\n',looptime,snr_ls_beforecorrect,errornum_ls_beforecorrect/2,ser_ls_beforecorrect);
            fprintf(' %f times, after, snr = %d , total ls error num = %d , ls error rate = %.6g .\n',looptime,snr_ls_aftercorrect,errornum_ls_aftercorrect,ser_ls_aftercorrect);
            fprintf(' %f times, total replace correct num = %d .\n\n',looptime , replace_correct_num);
+%            pause(1)
         end
-            
+                 
+    %% Save data  
+        if(~exist(save_path_mat,'dir'))
+            mkdir(char(save_path_mat));
+        end
+        if(~exist(save_path_txt,'dir'))
+            mkdir(char(save_path_txt));
+        end
 
-        %% Save data
-        if replace_correct_num_tmp < 0
-            if(~exist(save_path_mat,'dir'))
-                mkdir(char(save_path_mat));
-            end
-            if(~exist(save_path_txt,'dir'))
-                mkdir(char(save_path_txt));
-            end
-    
-            save_time = save_time + 1;
-            save_data = ['save_data_' num2str(looptime)];
-            save_data_inf = ['save_data_inf_' num2str(looptime)];
-            save_data_beforecorrect = ['save_data_beforecorrect_' num2str(looptime)];
-            save_data_forcorrect = ['save_data_forcorrect_' num2str(looptime)];
-            save_data_aftercorrect = ['save_data_aftercorrect_' num2str(looptime)];
-            save_signal_send = ['save_signal_send_' num2str(looptime)];
-            save_signal_ori = ['save_signal_ori_' num2str(looptime)];
-            save_signal_received_inf = ['save_signal_received_inf_' num2str(looptime)];
-            save_fin_syn_point_inf = ['save_fin_syn_point_inf_' num2str(looptime)];
-            save_coar_syn_point_inf = ['save_coar_syn_point_inf_' num2str(looptime)];
-            save_signal_received_real_send1 = ['save_signal_received_real_send1_' num2str(looptime)];
-            save_fin_syn_point_real_send1 = ['save_fin_syn_point_real_send1_' num2str(looptime)];
-            save_coar_syn_point_real_send1 = ['save_coar_syn_point_real_send1_' num2str(looptime)];
-            save_signal_received_real_send2 = ['save_signal_received_real_send2_' num2str(looptime)];
-            save_fin_syn_point_forcorrect = ['save_fin_syn_point_forcorrect_' num2str(looptime)];
-            save_coar_syn_point_real_send2 = ['save_coar_syn_point_real_send2_' num2str(looptime)];
-            save_signal_received_aftercorrect = ['save_signal_received_aftercorrect_' num2str(looptime)];
-            save_replace_location = ['save_replace_location_' num2str(looptime)];
-            save_errlocation_before = ['save_errlocation_before_' num2str(looptime)];
-            save_errlocation_forcorrect = ['save_errlocation_forcorrect_' num2str(looptime)];
-            save_errlocation_after = ['save_errlocation_after_' num2str(looptime)];
+        save_time = save_time + 1;
+        save_data = ['save_data_' num2str(looptime)];
+        save_data_inf = ['save_data_inf_' num2str(looptime)];
+        save_data_beforecorrect = ['save_data_beforecorrect_' num2str(looptime)];
+        save_data_forcorrect = ['save_data_forcorrect_' num2str(looptime)];
+        save_data_aftercorrect = ['save_data_aftercorrect_' num2str(looptime)];
+        save_signal_send = ['save_signal_send_' num2str(looptime)];
+        save_signal_ori = ['save_signal_ori_' num2str(looptime)];           
+        save_signal_send_inf = ['save_signal_send_inf_' num2str(looptime)];
+        save_signal_pass_channel_inf = ['save_signal_pass_channel_inf_' num2str(looptime)];
+        save_signal_pass_channel = ['save_signal_pass_channel_' num2str(looptime)];
+        save_signal_pass_channel_correct = ['save_signal_pass_channel_correct_' num2str(looptime)];
+        save_signal_received_inf = ['save_signal_received_inf_' num2str(looptime)];
+        save_fin_syn_point_inf = ['save_fin_syn_point_inf_' num2str(looptime)];
+        save_coar_syn_point_inf = ['save_coar_syn_point_inf_' num2str(looptime)];
+        save_signal_received_real_send1 = ['save_signal_received_real_send1_' num2str(looptime)];
+        save_fin_syn_point_real_send1 = ['save_fin_syn_point_real_send1_' num2str(looptime)];
+        save_coar_syn_point_real_send1 = ['save_coar_syn_point_real_send1_' num2str(looptime)];
+        save_signal_received_real_send2 = ['save_signal_received_real_send2_' num2str(looptime)];
+        save_fin_syn_point_forcorrect = ['save_fin_syn_point_forcorrect_' num2str(looptime)];
+        save_coar_syn_point_real_send2 = ['save_coar_syn_point_real_send2_' num2str(looptime)];
+        save_signal_received_aftercorrect = ['save_signal_received_aftercorrect_' num2str(looptime)];
+        save_replace_location = ['save_replace_location_' num2str(looptime)];
+        save_errlocation_before = ['save_errlocation_before_' num2str(looptime)];
+        save_errlocation_forcorrect = ['save_errlocation_forcorrect_' num2str(looptime)];
+        save_errlocation_after = ['save_errlocation_after_' num2str(looptime)];
+
+        eval([save_data,'=data;']);
+        eval([save_data_inf,'=data_demod_ls_inf;']);
+        eval([save_data_beforecorrect,'=data_demod_ls_real_send1;']);
+        eval([save_data_forcorrect,'=data_demod_ls_real_send2;']);
+        eval([save_data_aftercorrect,'=data_demod_ls_aftercorrect;']);
+        eval([save_signal_send,'=signal_send;']);
+        eval([save_signal_ori,'=signal_ori;']);       
+        eval([save_signal_send_inf,'=signal_send_inf;']);
+        eval([save_signal_pass_channel_inf,'=signal_pass_channel_inf;']);
+        eval([save_signal_pass_channel,'=signal_pass_channel;']);
+        eval([save_signal_pass_channel_correct,'=signal_pass_channel_correct;']);       
+        eval([save_signal_received_inf,'=signal_received_inf;']);
+        eval([save_fin_syn_point_inf,'=fin_syn_point_inf;']);
+        eval([save_coar_syn_point_inf,'=coar_syn_point_inf;']);
+        eval([save_signal_received_real_send1,'=signal_received_real_send1;']);
+        eval([save_fin_syn_point_real_send1,'=fin_syn_point_real_send1;']);
+        eval([save_coar_syn_point_real_send1,'=coar_syn_point_real_send1;']);
+        eval([save_signal_received_real_send2,'=signal_received_real_send2;']);
+        eval([save_fin_syn_point_forcorrect,'=fin_syn_point_forcorrect;']);
+        eval([save_coar_syn_point_real_send2,'=coar_syn_point_real_send2;']);
+        eval([save_signal_received_aftercorrect,'=signal_received_aftercorrect;']);
+        eval([save_replace_location,'=error_location_inf;']);
+        eval([save_errlocation_before,'=error_location_loop_real_send1;']);
+        eval([save_errlocation_forcorrect,'=error_location_loop_real_send2;']);
+        eval([save_errlocation_after,'=error_location_aftercorrect;']);
+
+        if save_time == 1
+            save(save_path_mat+"/save_data.mat",save_data);
+            save(save_path_mat+"/save_data_inf.mat",save_data_inf);
+            save(save_path_mat+"/save_data_beforecorrect.mat",save_data_beforecorrect);
+            save(save_path_mat+"/save_data_forcorrect.mat",save_data_forcorrect);
+            save(save_path_mat+"/save_data_aftercorrect.mat",save_data_aftercorrect);
+            save(save_path_mat+"/save_signal_send.mat",save_signal_send);
+            save(save_path_mat+"/save_signal_ori.mat",save_signal_ori);            
+            save(save_path_mat+"/save_signal_send_inf.mat",save_signal_send_inf);
+            save(save_path_mat+"/save_signal_pass_channel_inf.mat",save_signal_pass_channel_inf);
+            save(save_path_mat+"/save_signal_pass_channel.mat",save_signal_pass_channel);
+            save(save_path_mat+"/save_signal_pass_channel_correct.mat",save_signal_pass_channel_correct);          
+            save(save_path_mat+"/save_signal_received_inf.mat",save_signal_received_inf);
+            save(save_path_mat+"/save_fin_syn_point_inf.mat",save_fin_syn_point_inf);
+            save(save_path_mat+"/save_coar_syn_point_inf.mat",save_coar_syn_point_inf);
+            save(save_path_mat+"/save_signal_received_real_send1.mat",save_signal_received_real_send1);
+            save(save_path_mat+"/save_fin_syn_point_real_send1.mat",save_fin_syn_point_real_send1);
+            save(save_path_mat+"/save_coar_syn_point_real_send1.mat",save_coar_syn_point_real_send1);
+            save(save_path_mat+"/save_signal_received_real_send2.mat",save_signal_received_real_send2);
+            save(save_path_mat+"/save_fin_syn_point_forcorrect.mat",save_fin_syn_point_forcorrect);
+            save(save_path_mat+"/save_coar_syn_point_real_send2.mat",save_coar_syn_point_real_send2);
+            save(save_path_mat+"/save_signal_received_aftercorrect.mat",save_signal_received_aftercorrect);
+            save(save_path_mat+"/save_replace_location.mat",save_replace_location);
+            save(save_path_mat+"/save_errlocation_before.mat",save_errlocation_before);
+            save(save_path_mat+"/save_errlocation_forcorrect.mat",save_errlocation_forcorrect);
+            save(save_path_mat+"/save_errlocation_after.mat",save_errlocation_after);
             
-            eval([save_data,'=data;']);
-            eval([save_data_inf,'=data_demod_ls_inf;']);
-            eval([save_data_beforecorrect,'=data_demod_ls_real_send1;']);
-            eval([save_data_forcorrect,'=data_demod_ls_real_send2;']);
-            eval([save_data_aftercorrect,'=data_demod_ls_aftercorrect;']);
-            eval([save_signal_send,'=signal_send;']);
-            eval([save_signal_ori,'=signal_ori;']);
-            eval([save_signal_received_inf,'=signal_received_inf;']);
-            eval([save_fin_syn_point_inf,'=fin_syn_point_inf;']);
-            eval([save_coar_syn_point_inf,'=coar_syn_point_inf;']);
-            eval([save_signal_received_real_send1,'=signal_received_real_send1;']);
-            eval([save_fin_syn_point_real_send1,'=fin_syn_point_real_send1;']);
-            eval([save_coar_syn_point_real_send1,'=coar_syn_point_real_send1;']);
-            eval([save_signal_received_real_send2,'=signal_received_real_send2;']);
-            eval([save_fin_syn_point_forcorrect,'=fin_syn_point_forcorrect;']);
-            eval([save_coar_syn_point_real_send2,'=coar_syn_point_real_send2;']);
-            eval([save_signal_received_aftercorrect,'=signal_received_aftercorrect;']);
-            eval([save_replace_location,'=error_location_inf;']);
-            eval([save_errlocation_before,'=error_location_loop_real_send1;']);
-            eval([save_errlocation_forcorrect,'=error_location_loop_real_send2;']);
-            eval([save_errlocation_after,'=error_location_aftercorrect;']);
-            
-            if save_time == 1
-                save(save_path_mat+"/save_data.mat",save_data);
-                save(save_path_mat+"/save_data_inf.mat",save_data_inf);
-                save(save_path_mat+"/save_data_beforecorrect.mat",save_data_beforecorrect);
-                save(save_path_mat+"/save_data_forcorrect.mat",save_data_forcorrect);
-                save(save_path_mat+"/save_data_aftercorrect.mat",save_data_aftercorrect);
-                save(save_path_mat+"/save_signal_send.mat",save_signal_send);
-                save(save_path_mat+"/save_signal_ori.mat",save_signal_ori);
-                save(save_path_mat+"/save_signal_received_inf.mat",save_signal_received_inf);
-                save(save_path_mat+"/save_fin_syn_point_inf.mat",save_fin_syn_point_inf);
-                save(save_path_mat+"/save_coar_syn_point_inf.mat",save_coar_syn_point_inf);
-                save(save_path_mat+"/save_signal_received_real_send1.mat",save_signal_received_real_send1);
-                save(save_path_mat+"/save_fin_syn_point_real_send1.mat",save_fin_syn_point_real_send1);
-                save(save_path_mat+"/save_coar_syn_point_real_send1.mat",save_coar_syn_point_real_send1);
-                save(save_path_mat+"/save_signal_received_real_send2.mat",save_signal_received_real_send2);
-                save(save_path_mat+"/save_fin_syn_point_forcorrect.mat",save_fin_syn_point_forcorrect);
-                save(save_path_mat+"/save_coar_syn_point_real_send2.mat",save_coar_syn_point_real_send2);
-                save(save_path_mat+"/save_signal_received_aftercorrect.mat",save_signal_received_aftercorrect);
-                save(save_path_mat+"/save_replace_location.mat",save_replace_location);
-                save(save_path_mat+"/save_errlocation_before.mat",save_errlocation_before);
-                save(save_path_mat+"/save_errlocation_forcorrect.mat",save_errlocation_forcorrect);
-                save(save_path_mat+"/save_errlocation_after.mat",save_errlocation_after);
-                
-                save_errnum = fopen(save_path_txt+"/save_errnum.txt",'w');
-                fprintf(save_errnum,' 4pam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',pilot_length,zero_length,data_length,origin_rate);
-            else
-                save(save_path_mat+"/save_data.mat",save_data,'-append');
-                save(save_path_mat+"/save_data_inf.mat",save_data_inf,'-append');
-                save(save_path_mat+"/save_data_beforecorrect.mat",save_data_beforecorrect,'-append');
-                save(save_path_mat+"/save_data_forcorrect.mat",save_data_forcorrect,'-append');
-                save(save_path_mat+"/save_data_aftercorrect.mat",save_data_aftercorrect,'-append');
-                save(save_path_mat+"/save_signal_send.mat",save_signal_send,'-append');
-                save(save_path_mat+"/save_signal_ori.mat",save_signal_ori,'-append');
-                save(save_path_mat+"/save_signal_received_inf.mat",save_signal_received_inf,'-append');
-                save(save_path_mat+"/save_fin_syn_point_inf.mat",save_fin_syn_point_inf,'-append');
-                save(save_path_mat+"/save_coar_syn_point_inf.mat",save_coar_syn_point_inf,'-append');
-                save(save_path_mat+"/save_signal_received_real_send1.mat",save_signal_received_real_send1,'-append');
-                save(save_path_mat+"/save_fin_syn_point_real_send1.mat",save_fin_syn_point_real_send1,'-append');
-                save(save_path_mat+"/save_coar_syn_point_real_send1.mat",save_coar_syn_point_real_send1,'-append');
-                save(save_path_mat+"/save_signal_received_real_send2.mat",save_signal_received_real_send2,'-append');
-                save(save_path_mat+"/save_fin_syn_point_forcorrect.mat",save_fin_syn_point_forcorrect,'-append');
-                save(save_path_mat+"/save_coar_syn_point_real_send2.mat",save_coar_syn_point_real_send2,'-append');
-                save(save_path_mat+"/save_signal_received_aftercorrect.mat",save_signal_received_aftercorrect,'-append');
-                save(save_path_mat+"/save_replace_location.mat",save_replace_location,'-append');
-                save(save_path_mat+"/save_errlocation_before.mat",save_errlocation_before,'-append');
-                save(save_path_mat+"/save_errlocation_forcorrect.mat",save_errlocation_forcorrect,'-append');
-                save(save_path_mat+"/save_errlocation_after.mat",save_errlocation_after,'-append');
-                
-                save_errnum = fopen(save_path_txt+"/save_errnum.txt",'a');
-            end
-            fprintf(save_errnum,' %f times, before error = %d , replace num = %d , after error = %d , replace correct num = %d .\n', ...
-                looptime , errornum_ls_loop_real_send1 , txerror_num_loop ,  errornum_ls_loop_aftercorrect , replace_correct_num_tmp);
-            fclose(save_errnum);
+            save_errnum = fopen(save_path_txt+"/save_errnum.txt",'w');
+            fprintf(save_errnum,' 4pam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',pilot_length,zero_length,data_length,origin_rate);
+        else
+            save(save_path_mat+"/save_data.mat",save_data,'-append');
+            save(save_path_mat+"/save_data_inf.mat",save_data_inf,'-append');
+            save(save_path_mat+"/save_data_beforecorrect.mat",save_data_beforecorrect,'-append');
+            save(save_path_mat+"/save_data_forcorrect.mat",save_data_forcorrect,'-append');
+            save(save_path_mat+"/save_data_aftercorrect.mat",save_data_aftercorrect,'-append');
+            save(save_path_mat+"/save_signal_send.mat",save_signal_send,'-append');
+            save(save_path_mat+"/save_signal_ori.mat",save_signal_ori,'-append');           
+            save(save_path_mat+"/save_signal_send_inf.mat",save_signal_send_inf,'-append');
+            save(save_path_mat+"/save_signal_pass_channel_inf.mat",save_signal_pass_channel_inf,'-append');
+            save(save_path_mat+"/save_signal_pass_channel.mat",save_signal_pass_channel,'-append');
+            save(save_path_mat+"/save_signal_pass_channel_correct.mat",save_signal_pass_channel_correct,'-append');          
+            save(save_path_mat+"/save_signal_received_inf.mat",save_signal_received_inf,'-append');
+            save(save_path_mat+"/save_fin_syn_point_inf.mat",save_fin_syn_point_inf,'-append');
+            save(save_path_mat+"/save_coar_syn_point_inf.mat",save_coar_syn_point_inf,'-append');
+            save(save_path_mat+"/save_signal_received_real_send1.mat",save_signal_received_real_send1,'-append');
+            save(save_path_mat+"/save_fin_syn_point_real_send1.mat",save_fin_syn_point_real_send1,'-append');
+            save(save_path_mat+"/save_coar_syn_point_real_send1.mat",save_coar_syn_point_real_send1,'-append');
+            save(save_path_mat+"/save_signal_received_real_send2.mat",save_signal_received_real_send2,'-append');
+            save(save_path_mat+"/save_fin_syn_point_forcorrect.mat",save_fin_syn_point_forcorrect,'-append');
+            save(save_path_mat+"/save_coar_syn_point_real_send2.mat",save_coar_syn_point_real_send2,'-append');
+            save(save_path_mat+"/save_signal_received_aftercorrect.mat",save_signal_received_aftercorrect,'-append');
+            save(save_path_mat+"/save_replace_location.mat",save_replace_location,'-append');
+            save(save_path_mat+"/save_errlocation_before.mat",save_errlocation_before,'-append');
+            save(save_path_mat+"/save_errlocation_forcorrect.mat",save_errlocation_forcorrect,'-append');
+            save(save_path_mat+"/save_errlocation_after.mat",save_errlocation_after,'-append');
+
+            save_errnum = fopen(save_path_txt+"/save_errnum.txt",'a');
         end
-       %% 
-    end  
-    
+        fprintf(save_errnum,' %f times, before error = %d , replace num = %d , after error = %d , replace correct num = %d .\n', ...
+            looptime , errornum_ls_loop_real_send1 , txerror_num_loop ,  errornum_ls_loop_aftercorrect , replace_correct_num_tmp);
+        fclose(save_errnum);
+    end
 end
