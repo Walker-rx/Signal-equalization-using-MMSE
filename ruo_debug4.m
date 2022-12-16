@@ -104,7 +104,7 @@ for amp = amp_begin:amp_end
     replace_valid_num = 0;
     replace_correct_num = 0;
 
-    while(errornum_ls_aftercorrect <= 100 || looptime < 300)
+    while(errornum_ls_beforecorrect <= 100 || looptime < 300)
 %     while(looptime < 10)
         
         looptime = looptime+1;
