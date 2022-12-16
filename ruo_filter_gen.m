@@ -1,4 +1,5 @@
-function[new_origin_rate , new_d_rate , upf_transmit , dof_transmit , filter_transmit , upf_receive , dof_receive , filter_receive] = ruo_filter_gen(origin_rate,f_rate,times,filter_order,rp,rst)
+function[new_origin_rate , new_d_rate , upf_transmit , dof_transmit , filter_transmit , upf_receive , dof_receive , filter_receive] ...
+    = ruo_filter_gen(origin_rate,f_rate,times,filter_order,rp,rst)
 
     err = 1e20;
     for n = 1:100
@@ -32,6 +33,10 @@ function[new_origin_rate , new_d_rate , upf_transmit , dof_transmit , filter_tra
         end
     end
 
+    upf_transmit = round(upf_transmit);
+    dof_transmit = round(dof_transmit);
+    upf_receive = round(upf_receive);
+    dof_receive = round(dof_receive);
     bw = new_origin_rate/2;
     ups_rate_transmit = new_origin_rate*upf_transmit;
     ups_rate_receive = f_rate*upf_receive;

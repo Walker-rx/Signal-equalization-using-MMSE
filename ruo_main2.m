@@ -25,15 +25,15 @@ test = [1 0 1 0 1 1 1];
 bias_name = 780;
 pause(0.5);
 
-M = 4;
+M = 8;
 data_length_initial = 10000;
 zero_length = 3000;
 zero_length_forsyn = 200;
 ls_order = 50;
 num_of_windows = 100;
 
-times = 6;
-origin_rate_tmp = 10e6;
+times = 12;
+origin_rate_tmp = 12e6;
 f_rate = 160e6;
 d_rate_tmp = origin_rate_tmp*times;
 
@@ -75,17 +75,18 @@ data_length = round(data_length_initial*8/ups_time);
 
 %%
 t = datetime('now');
-save_path = "snr_ser/light/12.14/10M/correct_transmit";
+save_path = "snr_ser/direct/replace/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M/"+M+"pam";
 if(~exist(save_path,'dir'))
     mkdir(char(save_path));
 end
 
-amp_begin = -11;
-amp_end = 70;
-amp_inf = 38;
+amp_begin = -8;
+amp_end = 90;
+amp_inf = 40;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 
 for amp = amp_begin:amp_end
+    tic
     fprintf("amp = %d \n",amp);
     looptime = 0;
     ps_aftercorrect = 0;
@@ -103,7 +104,7 @@ for amp = amp_begin:amp_end
     replace_valid_num = 0;
     replace_correct_num = 0;
 
-    while(errornum_ls_aftercorrect <= 100 || looptime < 300)
+    while(errornum_ls_aftercorrect <= 100 || looptime < 100)
 %     while(looptime < 10)
         
         looptime = looptime+1;
@@ -129,7 +130,6 @@ for amp = amp_begin:amp_end
       
         ruo_send;
         ruo_send_correct;
-        
         %% Locating the transmission error point
         signal_received_inf = ruo_sam_rate_con(signal_pass_channel_inf,filter_receive,upf_receive,dof_receive);
         
@@ -263,10 +263,10 @@ for amp = amp_begin:amp_end
         fser_aftercorrect = fopen(save_path+"/ser_aftercorrect.txt",'w');
         freplace_valid = fopen(save_path+"/replace_valid.txt",'w');
         
-        fprintf(fsnr_beforecorrect,' 4pam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',pilot_length,zero_length,data_length,origin_rate);
-        fprintf(fser_beforecorrect,' 4pam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',pilot_length,zero_length,data_length,origin_rate);
-        fprintf(fsnr_aftercorrect,' 4pam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',pilot_length,zero_length,data_length,origin_rate);
-        fprintf(fser_aftercorrect,' 4pam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',pilot_length,zero_length,data_length,origin_rate);
+        fprintf(fsnr_beforecorrect,' %dpam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
+        fprintf(fser_beforecorrect,' %dpam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
+        fprintf(fsnr_aftercorrect,' %dpam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
+        fprintf(fser_aftercorrect,' %dpam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
     else
         fsnr_beforecorrect = fopen(save_path+"/snr_beforecorrect.txt",'a');
         fser_beforecorrect = fopen(save_path+"/ser_beforecorrect.txt",'a');
@@ -278,13 +278,14 @@ for amp = amp_begin:amp_end
     fprintf(fser_beforecorrect,'%.6g \r\n',ser_ls_beforecorrect);
     fprintf(fsnr_aftercorrect,'%.8f \r\n',snr_ls_aftercorrect);
     fprintf(fser_aftercorrect,'%.6g \r\n',ser_ls_aftercorrect);
-    fprintf(freplace_valid,'amp = %.d , looptime = %d , replace valid num = %d , replace correct num = %d \r\n',amp,looptime,replace_valid_num,replace_correct_num);
+    fprintf(freplace_valid,'amp = %.d , looptime = %d , replace valid num = %d , replace correct num = %d , total data length = %d \r\n',amp,looptime,replace_valid_num,replace_correct_num,total_length_aftercorrect);
 
     fclose(fsnr_beforecorrect);
     fclose(fser_beforecorrect);
     fclose(fsnr_aftercorrect);
     fclose(fser_aftercorrect);
     fclose(freplace_valid);
+    toc
 end
 
 

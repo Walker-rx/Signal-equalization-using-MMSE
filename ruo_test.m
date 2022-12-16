@@ -33,7 +33,7 @@ ls_order = 50;
 num_of_windows = 100;
 
 times = 6;
-origin_rate_tmp = 10e6;
+origin_rate_tmp = 25e6;
 f_rate = 160e6;
 d_rate_tmp = origin_rate_tmp*times;
 

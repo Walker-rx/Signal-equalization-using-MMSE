@@ -32,8 +32,8 @@ zero_length_forsyn = 200;
 ls_order = 50;
 num_of_windows = 100;
 
-times = 6;
-origin_rate_tmp = 67e6;
+times = 12;
+origin_rate_tmp = 12e6;
 f_rate = 160e6;
 d_rate_tmp = origin_rate_tmp*times;
 
@@ -75,17 +75,17 @@ data_length = round(data_length_initial*8/ups_time);
 
 %%
 t = datetime('now');
-save_path = "snr_ser/direct/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M/"+M+"pam";
+save_path = "snr_ser/direct/replace/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M/"+M+"pam";
 if(~exist(save_path,'dir'))
     mkdir(char(save_path));
 end
 
-amp_begin = -2;
+amp_begin = -8;
 amp_end = 90;
-amp_inf = 50;
+amp_inf = 40;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 
-for amp = 8:amp_end
+for amp = amp_begin:amp_end
     tic
     fprintf("amp = %d \n",amp);
     looptime = 0;

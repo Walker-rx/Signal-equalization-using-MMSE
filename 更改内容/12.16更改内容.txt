@@ -1,0 +1,4 @@
+12.16
+
+新增ruo_debug4，测试没有更正传输错误时的8pam的ser。
+数据存储在"snr_ser/direct/not_replace/12.16/10M/8pam";
