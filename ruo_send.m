@@ -19,6 +19,8 @@ end
 % signal_send = [rand([1,512]) zeros(1,10) signal_send];
 Tx{1} = signal_send_inf;
 Tx{2} = signal_send;
+% Tx{1} = signal_send;
+% Tx{2} = signal_send_inf;
 
 X_realsend = ruo_TxDataSort(Tx);
 ruo_trans2bin(X_realsend);
