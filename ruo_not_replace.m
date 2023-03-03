@@ -46,9 +46,10 @@ rst = 1e-4;       % filter parameter used in function sam_rate_con
 rate_change = 100*abs(origin_rate-origin_rate_tmp)/origin_rate_tmp;
 fprintf("rate's change = %.8f%% \n",rate_change);
 ups_time = upf_transmit/dof_transmit;
-data_length = round(data_length_initial*8/ups_time);
+% data_length = round(data_length_initial*8/ups_time);
+data_length = data_length_initial;
 
-filter_10m = firceqrip(filter_order,0.2e6/(origin_rate/2),[rp rst],'high');
+filter_10m = firceqrip(filter_order,0.5e6/(origin_rate/2),[rp rst],'high');
 %% Generate pilot
 % pilot = pilot_gen([0 0 0 1 1 1 1]);
 % pilot = pilot_gen([1 1 1 0 0 0 1 1 1]);
@@ -82,17 +83,17 @@ pilot_length = length(pilot);
 
 %%
 t = datetime('now');
-save_path = "snr_ser/direct/not_replace/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M/"+M+"pam";
+save_path = "snr_ser/light/not_replace/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M/"+M+"pam";
 if(~exist(save_path,'dir'))
     mkdir(char(save_path));
 end
 
-amp_begin = -10;
-amp_end = 90;
-amp_inf = 40;
+amp_begin = -11;
+amp_end = 70;
+amp_inf = 20;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 
-for amp = -10:amp_end
+for amp = 30:amp_end
     fprintf("amp = %d \n",amp);
     looptime = 0;
     ps_beforecorrect = 0;
@@ -109,26 +110,8 @@ for amp = -10:amp_end
         data_mpam_ini = real(pammod(data_ini,M));
         data_mpam_tmp = conv(data_mpam_ini,filter_10m);
         data_mpam_tmp = data_mpam_tmp((length(filter_10m)+1)/2 : length(data_mpam_tmp)-(length(filter_10m)-1)/2);        
-        data_mpam = zeros(1,data_length);
-        for i = 1:length(data_mpam_tmp)
-            if data_mpam_tmp(i) >= 6
-                data_mpam(i) = 7;               
-            elseif data_mpam_tmp(i) >= 4
-                data_mpam(i) = 5;
-            elseif data_mpam_tmp(i) >= 2
-                data_mpam(i) = 3;
-            elseif data_mpam_tmp(i) >= 0
-                data_mpam(i) = 1;
-            elseif data_mpam_tmp(i) >= -2
-                data_mpam(i) = -1;
-            elseif data_mpam_tmp(i) >= -4
-                data_mpam(i) = -3;
-            elseif data_mpam_tmp(i) >= -6
-                data_mpam(i) = -5;
-            else
-                data_mpam(i) = -7;
-            end
-        end          
+        
+        data_mpam = ruo_gen_newsend(data_mpam_tmp,M);        
         data = ruo_pamdemod(data_mpam,M);
         data_mpam_ps = bandpower(data_mpam);  
         
@@ -173,7 +156,7 @@ for amp = -10:amp_end
                      
         if mod(looptime,5) == 0
            fprintf('\n');
-           fprintf(' amp = %d , %d times , snr = %d , total ls error num = %d , ls error rate = %.6g .\n', ... 
+           fprintf(' not replace , amp = %d , %d times , snr = %d , total ls error num = %d , ls error rate = %.6g .\n', ... 
                amp , looptime , snr_ls_beforecorrect , errornum_ls_beforecorrect , ser_ls_beforecorrect);
 %            pause(1)
         end
@@ -184,8 +167,8 @@ for amp = -10:amp_end
         fsnr_beforecorrect = fopen(save_path+"/snr_beforecorrect.txt",'w');
         fser_beforecorrect = fopen(save_path+"/ser_beforecorrect.txt",'w');
         
-        fprintf(fsnr_beforecorrect,' %dpam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
-        fprintf(fser_beforecorrect,' %dpam ,add zero ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
+        fprintf(fsnr_beforecorrect,' %dpam ,not replace ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
+        fprintf(fser_beforecorrect,' %dpam ,not replace ,pilot length  = %d , zero length  = %d , data length  = %d , origin_rate = %.6g \r\n',M,pilot_length,zero_length,data_length,origin_rate);
     else
         fsnr_beforecorrect = fopen(save_path+"/snr_beforecorrect.txt",'a');
         fser_beforecorrect = fopen(save_path+"/ser_beforecorrect.txt",'a');

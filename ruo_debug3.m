@@ -25,7 +25,7 @@ test = [1 0 1 0 1 1 1];
 bias_name = 780;
 pause(0.5);
 
-M = 8;
+M = 16;
 data_length_initial = 10000;
 zero_length = 3000;
 zero_length_forsyn = 200;
@@ -41,21 +41,29 @@ filter_order = 2000;     % filter order used in function sam_rate_con
 rp = 0.00057565;      
 rst = 1e-4;       % filter parameter used in function sam_rate_con
 
-%% Generate pilot
-% pilot = pilot_gen([0 0 0 1 1 1 1]);
-% pilot = pilot_gen([1 1 1 0 0 0 1 1 1]);
-pilot = ruo_pilot_gen([1 1 1 1 1 1 0 1 0 0 1]);    %  2^11 = 2048
-% pilot = ruo_pilot_gen([1 1 1 1 1 1 0 1 0 1 0 1 1]);   %  2^13 = 8192
-pilot_ps = bandpower(pilot);
-pilot_length = length(pilot);
-pilot_bpsk = pilot*2-1;
-
 %% Generate filter
 [origin_rate , d_rate , upf_transmit , dof_transmit , filter_transmit , upf_receive , dof_receive , filter_receive] = ruo_filter_gen(origin_rate_tmp , f_rate , times , filter_order , rp , rst);
 rate_change = 100*abs(origin_rate-origin_rate_tmp)/origin_rate_tmp;
 fprintf("rate's change = %.8f%% \n",rate_change);
 ups_time = upf_transmit/dof_transmit;
-data_length = round(data_length_initial*8/ups_time);
+% data_length = round(data_length_initial*8/ups_time);
+data_length = data_length_initial;
+
+filter_10m = firceqrip(filter_order,0.5e6/(origin_rate/2),[rp rst],'high');
+%% Generate pilot
+% pilot = pilot_gen([0 0 0 1 1 1 1]);
+% pilot = pilot_gen([1 1 1 0 0 0 1 1 1]);
+pilot_ini = ruo_pilot_gen([1 1 1 1 1 1 0 1 0 0 1]);    %  2^11 = 2048
+% pilot = ruo_pilot_gen([1 1 1 1 1 1 0 1 0 1 0 1 1]);   %  2^13 = 8192
+pilot_bpsk_ini = pilot_ini*2-1;
+pilot_bpsk_tmp = conv(pilot_bpsk_ini,filter_10m);
+pilot_bpsk_tmp = pilot_bpsk_tmp((length(filter_10m)+1)/2 : length(pilot_bpsk_tmp)-(length(filter_10m)-1)/2);
+pilot_bpsk_tmp(pilot_bpsk_tmp <= 0) = -1;
+pilot_bpsk_tmp(pilot_bpsk_tmp > 0) = 1;
+pilot_bpsk = pilot_bpsk_tmp;
+pilot = ruo_pamdemod(pilot_bpsk,2);
+pilot_length = length(pilot);
+
 %%
 % origin_rate = gpuArray(double(origin_rate));
 % f_rate = gpuArray(double(f_rate));
@@ -75,17 +83,17 @@ data_length = round(data_length_initial*8/ups_time);
 
 %%
 t = datetime('now');
-save_path = "snr_ser/direct/replace/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M/"+M+"pam";
+save_path = "snr_ser/light/replace/"+t.Month+"."+t.Day+"/"+origin_rate_tmp/1e6+"M/"+M+"pam";
 if(~exist(save_path,'dir'))
     mkdir(char(save_path));
 end
 
 amp_begin = -10;
 amp_end = 90;
-amp_inf = 40;
+amp_inf = 20;
 fprintf('add zero,ls order=%d,pilot length=%d .\n',ls_order,pilot_length);
 
-for amp = 20:amp_end
+for amp = 25:amp_end
     fprintf("amp = %d \n",amp);
     looptime = 0;
     ps_aftercorrect = 0;
@@ -108,8 +116,13 @@ for amp = 20:amp_end
         
         looptime = looptime+1;
          %% Signal send
-        data = randi([0,M-1],[1,data_length]);
-        data_mpam = real(pammod(data,M));
+        data_ini = randi([0,M-1],[1,data_length]);
+        data_mpam_ini = real(pammod(data_ini,M));
+        data_mpam_tmp = conv(data_mpam_ini,filter_10m);
+        data_mpam_tmp = data_mpam_tmp((length(filter_10m)+1)/2 : length(data_mpam_tmp)-(length(filter_10m)-1)/2);
+        
+        data_mpam = ruo_gen_newsend(data_mpam_tmp,M);
+        data = ruo_pamdemod(data_mpam,M);
         data_mpam_ps = bandpower(data_mpam);  
         
         unmod = [pilot,zeros(1,zero_length),data];
@@ -129,6 +142,8 @@ for amp = 20:amp_end
       
         ruo_send;
         ruo_send_correct;
+%         signal_pass_channel_inf = signal_send_inf;
+%         signal_pass_channel = signal_send;        
         %% Locating the transmission error point
         signal_received_inf = ruo_sam_rate_con(signal_pass_channel_inf,filter_receive,upf_receive,dof_receive);
         

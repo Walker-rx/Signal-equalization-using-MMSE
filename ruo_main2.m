@@ -143,7 +143,7 @@ for amp = amp_begin:amp_end
             fin_syn_point_inf = fin_syn_point_inf_tmp + (pilot_length + zero_length_forsyn)*times;
         end
                
-        signal_demod_ls_inf = ruo_signal_equal_ls(signal_ori,signal_received_inf,times,fin_syn_point_inf,pilot_length,zero_length,ls_order);
+        signal_demod_ls_inf = ruo_signal_equal_ls(signal_ori,signal_received_inf,times,fin_syn_point_inf,pilot_length,zero_length,ls_order,M);
   
         data_demod_ls_inf = signal_demod_ls_inf(pilot_length+zero_length+1:end);
         
@@ -170,7 +170,7 @@ for amp = amp_begin:amp_end
         [length_loop_real_send1 , ps_loop_real_send1 , pn_loop_real_send1 , ...
             errornum_ls_loop_real_send1 , error_location_loop_real_send1 , data_demod_ls_real_send1] ...
             = ruo_calculate_ser( data , signal_ori , signal_received_real_send1 , pilot_length , zero_length , data_length ...
-                                 , fin_syn_point_real_send1 , times , ls_order);
+                                 , fin_syn_point_real_send1 , times , ls_order , M );
                                    
         signal_received_real_send2 = ruo_sam_rate_con(signal_pass_channel_correct,filter_receive,upf_receive,dof_receive);
         [fin_syn_point_real_send2_tmp , coar_syn_point_real_send2_tmp] = ruo_signal_syn(origin_rate,d_rate,signal_ori,signal_received_real_send2,num_of_windows);
@@ -184,7 +184,7 @@ for amp = amp_begin:amp_end
         [length_loop_real_send2 , ps_loop_real_send2 , pn_loop_real_send2 , ...
             errornum_ls_loop_real_send2 , error_location_loop_real_send2 , data_demod_ls_real_send2] ...
             = ruo_calculate_ser( data , signal_ori , signal_received_real_send2 , pilot_length , zero_length , data_length ...
-                                 , fin_syn_point_real_send2 , times , ls_order);
+                                 , fin_syn_point_real_send2 , times , ls_order , M );
         
         total_length_beforecorrect = total_length_beforecorrect + length_loop_real_send1 + length_loop_real_send2;
         ps_beforecorrect = ps_beforecorrect + ps_loop_real_send1 + ps_loop_real_send2;
@@ -223,7 +223,7 @@ for amp = amp_begin:amp_end
         [length_loop_aftercorrect , ps_loop_aftercorrect , pn_loop_aftercorrect , ...
             errornum_ls_loop_aftercorrect , error_location_aftercorrect , data_demod_ls_aftercorrect] ...
             = ruo_calculate_ser( data , signal_ori , signal_received_aftercorrect , pilot_length , zero_length , data_length ...
-                                 , fin_syn_point_real_send1 , times , ls_order);
+                                 , fin_syn_point_real_send1 , times , ls_order , M );
         
         total_length_aftercorrect = total_length_aftercorrect + length_loop_aftercorrect;
         errornum_ls_aftercorrect = errornum_ls_aftercorrect + errornum_ls_loop_aftercorrect;

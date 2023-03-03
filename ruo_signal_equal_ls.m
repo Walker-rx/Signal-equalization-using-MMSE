@@ -1,4 +1,4 @@
-function x_demod = ruo_signal_equal_ls(signal_origin,signal_current,times,fin_syn_point,pilot_length,zero_length,equal_order)
+function x_demod = ruo_signal_equal_ls(signal_origin,signal_current,times,fin_syn_point,pilot_length,zero_length,equal_order,M)
     w = zeros(equal_order,times);
     U = zeros(equal_order,pilot_length-equal_order+1);
     Err = zeros(1,times);
@@ -32,19 +32,11 @@ function x_demod = ruo_signal_equal_ls(signal_origin,signal_current,times,fin_sy
     pilot = x_hat(1:pilot_length);
     pilot(pilot <= 0) = 0;
     pilot(pilot > 0) = 1;
+%     pilot = ruo_pamdemod(pilot,M);
     zero = zeros(1,zero_length);
-    signal_data = x_hat(pilot_length+zero_length+1:end);
+    signal_data_tmp = x_hat(pilot_length+zero_length+1:end);
     %         signal_data(signal_data <= 0) = 0;
     %         signal_data(signal_data > 0) = 1;
-    signal_data = (signal_data+7)/2;
-    signal_data(signal_data <= 0.5) = 0;
-    signal_data(0.5 < signal_data & signal_data <= 1.5) = 1;
-    signal_data(1.5 < signal_data & signal_data <= 2.5) = 2;
-    signal_data(2.5 < signal_data & signal_data <= 3.5) = 3;
-    signal_data(3.5 < signal_data & signal_data <= 4.5) = 4;
-    signal_data(4.5 < signal_data & signal_data <= 5.5) = 5;
-    signal_data(5.5 < signal_data & signal_data <= 6.5) = 6;
-    signal_data(6.5 < signal_data) = 7;
+    signal_data = ruo_pamdemod(signal_data_tmp,M);
     x_demod = [ pilot, zero, signal_data ];
-
 end
